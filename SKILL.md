@@ -7,19 +7,32 @@ allowed-tools: "scripts/update_fc_insider_v3.py,scripts/tag_protector,scripts/ex
 
 ## 🚀 Claude Skills 環境快速開始（推薦）
 
-**適用於 Claude Skills 環境的簡化方案** → 詳見 [CLAUDE_SKILLS_GUIDE.md](CLAUDE_SKILLS_GUIDE.md)
+### ⭐ 新版：使用 MarkItDown（最準確）
 
-### 一鍵運行（僅需 python-docx）
+**使用 Microsoft MarkItDown 提供更準確的表格提取** → 詳見 [MARKITDOWN_GUIDE.md](MARKITDOWN_GUIDE.md)
+
+```bash
+bash run_workflow_markitdown.sh input.docx new_translations.json output.docx
+```
+
+**特點**：
+- ⭐ **使用 MarkItDown**（專為 LLM 優化的文檔轉換）
+- ✅ **更準確的表格提取**（解決 Target segment 識別問題）
+- ✅ 自動安裝依賴（markitdown + python-docx）
+- ✅ 完整追蹤修訂支持
+
+### 備選：標準版本（如果 MarkItDown 不可用）
+
+**適用於 Claude Skills 環境的簡化方案** → 詳見 [CLAUDE_SKILLS_GUIDE.md](CLAUDE_SKILLS_GUIDE.md)
 
 ```bash
 bash run_workflow_simple.sh input.docx new_translations.json output.docx
 ```
 
 **特點**：
-- ✅ 純 Python 實現，無需外部工具
+- ✅ 純 python-docx 實現，無需外部工具
 - ✅ 自動檢查並安裝依賴
-- ✅ 直接操作 DOCX 文件
-- ✅ 完整追蹤修訂支持
+- ⚠️ 表格提取可能不如 MarkItDown 準確
 
 ---
 
