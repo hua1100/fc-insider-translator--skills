@@ -1,15 +1,53 @@
 ---
 name: fc-insider-translator
-description: 使用追蹤修訂將翻譯批量更新到 FC Insider DOCX 文件的四欄表格結構中。適用於批量翻譯整理需求，且僅允許部分腳本執行以強化安全性。
-allowed-tools: "scripts/update_fc_insider_v3.py,scripts/tag_protector"
+description: 使用追蹤修訂將翻譯批量更新到 FC Insider DOCX 文件的四欄表格結構中。適用於批量翻譯整理需求，且僅允許部分腳本執行以強化安全性。支持混合方案（Word→Markdown→對照表→XML追蹤修訂）解決AI解析表格錯誤問題。
+allowed-tools: "scripts/update_fc_insider_v3.py,scripts/tag_protector,scripts/extract_table_to_markdown.py,scripts/generate_translation_mapping.py,scripts/run_translation_workflow.sh"
 ---
 # fc-insider-translator
 
+## ⚠️ 重要更新：混合方案（推薦使用）
+
+如果你在使用過程中遇到以下問題：
+- AI 判斷表格為空
+- 無法正確定位單元格
+- XML 解析錯誤
+
+**請使用新的混合方案工作流程** → 詳見 [WORKFLOW.md](WORKFLOW.md)
+
+### 混合方案概述
+
+混合方案將 **讀取** 和 **寫入** 分離，解決 AI 直接解析 Word XML 的問題：
+
+1. **讀取階段**：Word → Markdown（AI 友好格式）
+   - 使用 `extract_table_to_markdown.py`
+   - 支持 Pandoc 或 docx2python
+
+2. **分析階段**：基於 Markdown 生成對照表
+   - 使用 `generate_translation_mapping.py`
+   - 可預覽和驗證變更
+
+3. **寫入階段**：保持原有 XML + 追蹤修訂
+   - 使用 `update_fc_insider_v3.py`（已驗證有效）
+
+**快速開始**：
+```bash
+# 一鍵執行完整流程
+bash run_translation_workflow.sh input.docx new_translations.json output.docx
+```
+
+---
+
 ## 使用規範與安全提醒
 - 禁止生成或修改任何 Python 腳本。
-- 僅允許調用 scripts/update_fc_insider_v3.py、tag_protector 兩個存在於 scripts 資料夾的腳本。
+- 僅允許調用 scripts/ 資料夾中的以下腳本：
+  - `update_fc_insider_v3.py`（XML 追蹤修訂）
+  - `tag_protector.py`（標籤保護）
+  - `extract_table_to_markdown.py`（表格提取）
+  - `generate_translation_mapping.py`（對照表生成）
+  - `run_translation_workflow.sh`（自動化工作流程）
 - 不得創建替代腳本。
 - 若遇到錯誤，應僅輸出錯誤訊息並請求人工檢查，不可嘗試自動重寫腳本。
+
 # FC Insider 翻譯更新 Skill
 
 
