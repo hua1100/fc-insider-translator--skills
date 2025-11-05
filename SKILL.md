@@ -5,35 +5,58 @@ allowed-tools: "scripts/update_fc_insider_v3.py,scripts/tag_protector,scripts/ex
 ---
 # fc-insider-translator
 
-## ⚠️ 重要更新：混合方案（推薦使用）
+## 🚀 Claude Skills 環境快速開始（推薦）
 
-如果你在使用過程中遇到以下問題：
-- AI 判斷表格為空
-- 無法正確定位單元格
-- XML 解析錯誤
+**適用於 Claude Skills 環境的簡化方案** → 詳見 [CLAUDE_SKILLS_GUIDE.md](CLAUDE_SKILLS_GUIDE.md)
 
-**請使用新的混合方案工作流程** → 詳見 [WORKFLOW.md](WORKFLOW.md)
+### 一鍵運行（僅需 python-docx）
+
+```bash
+bash run_workflow_simple.sh input.docx new_translations.json output.docx
+```
+
+**特點**：
+- ✅ 純 Python 實現，無需外部工具
+- ✅ 自動檢查並安裝依賴
+- ✅ 直接操作 DOCX 文件
+- ✅ 完整追蹤修訂支持
+
+---
+
+## ⚠️ 其他環境：混合方案（需要 Pandoc）
+
+如果你**不在 Claude Skills 環境**，或需要更高級的功能，可使用混合方案：
+
+→ 詳見 [WORKFLOW.md](WORKFLOW.md)
 
 ### 混合方案概述
 
 混合方案將 **讀取** 和 **寫入** 分離，解決 AI 直接解析 Word XML 的問題：
 
 1. **讀取階段**：Word → Markdown（AI 友好格式）
-   - 使用 `extract_table_to_markdown.py`
-   - 支持 Pandoc 或 docx2python
+   - 使用 `extract_table_to_markdown.py`（需要 Pandoc 或 docx2python）
 
 2. **分析階段**：基於 Markdown 生成對照表
    - 使用 `generate_translation_mapping.py`
-   - 可預覽和驗證變更
 
 3. **寫入階段**：保持原有 XML + 追蹤修訂
-   - 使用 `update_fc_insider_v3.py`（已驗證有效）
+   - 使用 `update_fc_insider_v3.py`（需要 unpack/pack）
 
 **快速開始**：
 ```bash
-# 一鍵執行完整流程
+# 需要先安裝 Pandoc
 bash run_translation_workflow.sh input.docx new_translations.json output.docx
 ```
+
+---
+
+## 📚 文檔導航
+
+- **[CLAUDE_SKILLS_GUIDE.md](CLAUDE_SKILLS_GUIDE.md)** - Claude Skills 環境專用（推薦）
+- **[WORKFLOW.md](WORKFLOW.md)** - 完整混合方案（需要 Pandoc）
+- **[README.md](README.md)** - 項目概覽和技術對比
+- **[quickstart.md](quickstart.md)** - 原始 XML 方案參考
+- **[xml_patterns.md](xml_patterns.md)** - XML 結構參考
 
 ---
 
