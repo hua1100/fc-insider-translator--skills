@@ -12,14 +12,14 @@
 
 ```bash
 # 步骤 1: 提取表格
-python3 extract_table_markitdown_simple.py \
+python3 ../scripts/extract_table_markitdown_simple.py \
   --input "input.docx" \
   --output "extracted_table.md"
 
 # 📝 检查 extracted_table.md，确认表格提取正确
 
 # 步骤 2: 生成翻译映射（智能匹配）
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "extracted_table.md" \
   --new-translations "new_translations.txt" \
   --output "translations.json" \
@@ -29,7 +29,7 @@ python3 generate_translation_mapping.py \
 # 📝 检查输出的匹配示例和相似度分数
 
 # 步骤 3: 应用翻译
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
@@ -45,7 +45,7 @@ python3 update_fc_insider_tracked.py \
 熟悉流程后，使用一键执行：
 
 ```bash
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -127,7 +127,9 @@ python3 run_complete_workflow.py \
 
 **推荐**：
 ```bash
---author "Gemini" 或 --author "Claude"
+--author "Claire.lee@amway.com"  # 默认值，可省略
+--author "translator@company.com"  # 使用电子邮件地址
+--author "Gemini" 或 --author "Claude"  # 使用翻译引擎名称
 ```
 
 **不推荐**：
@@ -136,7 +138,8 @@ python3 run_complete_workflow.py \
 ```
 
 **原因**：
-- 在 Word 中查看修订时，能清楚知道是哪个翻译引擎的结果
+- 在 Word 中查看修订时，能清楚知道修订者身份
+- 使用电子邮件地址提供联络方式，更专业
 - 便于对比不同翻译引擎的效果
 
 ---
@@ -251,7 +254,7 @@ PY26 正式啟動！作為創辦人理事會領袖...
 ### 步骤 2: 测试流程
 
 ```bash
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "test_translations.txt" \
   --output "test_output.docx" \
@@ -271,7 +274,7 @@ python3 run_complete_workflow.py \
 确认无误后，处理全部翻译：
 
 ```bash
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "all_translations.txt" \
   --output "output.docx" \
@@ -295,7 +298,7 @@ output_20250106.docx
 ### 保留中间文件（可选）
 
 ```bash
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -333,7 +336,7 @@ python3 run_complete_workflow.py \
 如果 auto 模式失败，使用诊断工具：
 
 ```bash
-python3 analyze_word_structure_deep.py \
+python3 ../scripts/analyze_word_structure_deep.py \
   --input "input.docx" \
   --sample-segment "segment-id" \
   --verbose
@@ -365,14 +368,14 @@ python3 analyze_word_structure_deep.py \
 
 ```bash
 # Gemini 翻译
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "gemini_translations.txt" \
   --output "output_gemini.docx" \
   --author "Gemini"
 
 # Claude 翻译
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "claude_translations.txt" \
   --output "output_claude.docx" \
@@ -403,7 +406,7 @@ python3 run_complete_workflow.py \
 
 ```bash
 # 第一次运行，保留临时文件
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -411,7 +414,7 @@ python3 run_complete_workflow.py \
   --keep-temp
 
 # 之后只需重新运行步骤 3
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "/tmp/fc_insider_*/translations.json" \
   --output "output_v2.docx" \

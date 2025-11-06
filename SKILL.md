@@ -15,17 +15,32 @@ version: 2.0
 
 ---
 
+## 📦 安装依赖
+
+首次使用前，安装必需的依赖：
+
+```bash
+pip install python-docx lxml markitdown[docx]
+```
+
+⚠️ **重要**：必须安装 `markitdown[docx]`（包含 [docx]），而不是 `markitdown`
+
+完整依赖说明见 [PARAMETERS.md](references/PARAMETERS.md#依赖要求)
+
+---
+
 ## 🚀 快速开始
 
 ### 方式 1: 一键执行（推荐）
 
 ```bash
-python3 run_complete_workflow.py \
+python3 scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
-  --output "output.docx" \
-  --author "Your Name"
+  --output "output.docx"
 ```
+
+**提示**：默认作者为 "Claire.lee@amway.com"，可以省略 `--author` 参数。如需修改作者，添加 `--author "Your Name"`
 
 **就这么简单！** 脚本会自动完成表格提取、智能匹配、应用追踪修订。
 
@@ -33,24 +48,23 @@ python3 run_complete_workflow.py \
 
 ```bash
 # 步骤 1: 提取表格
-python3 extract_table_markitdown_simple.py \
+python3 scripts/extract_table_markitdown_simple.py \
   --input "input.docx" \
   --output "extracted_table.md"
 
 # 步骤 2: 生成翻译映射（智能匹配）
-python3 generate_translation_mapping.py \
+python3 scripts/generate_translation_mapping.py \
   --markdown "extracted_table.md" \
   --new-translations "new_translations.txt" \
   --output "translations.json" \
   --match-by smart \
   --verbose
 
-# 步骤 3: 应用翻译
-python3 update_fc_insider_tracked.py \
+# 步骤 3: 应用翻译（默认作者：Claire.lee@amway.com）
+python3 scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
-  --author "Your Name" \
   --mode auto \
   --verbose
 ```
@@ -103,6 +117,23 @@ output.docx (含追踪修订的输出文档)
 ### analyze_word_structure_deep.py
 深度诊断工具。分析 Word 文档结构，识别问题，提供解决方案建议。仅在遇到问题时使用。
 
+### handle_text_with_linebreaks.py
+處理包含內嵌換行符的翻譯更新。當 Word 文檔中的段落包含換行符（Shift+Enter 產生的軟換行），標準工作流程無法處理時使用。
+
+**使用場景**：
+- Word 文檔中有內嵌換行符（`<w:br/>`）
+- 標準工作流程提示「文本不匹配」錯誤
+- 需要保留原文檔的換行符格式
+
+**示例**：
+```bash
+python3 scripts/handle_text_with_linebreaks.py \
+  --input "input.docx" \
+  --translations "translations.json" \
+  --output "output.docx" \
+  --verbose
+```
+
 ---
 
 ## 📝 输入文件格式
@@ -126,17 +157,16 @@ PY26 正式啟動！作為創辦人理事會領袖...
 ## 📚 完整文档
 
 ### 详细指南
-- **[PARAMETERS.md](PARAMETERS.md)** - 完整参数说明
-- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - 故障排查指南
-- **[BEST_PRACTICES.md](BEST_PRACTICES.md)** - 使用最佳实践
-- **[ADVANCED.md](ADVANCED.md)** - 高级功能详解
-- **[MIGRATION_GUIDE.md](MIGRATION_GUIDE.md)** - 从旧版本迁移
+- **[PARAMETERS.md](references/PARAMETERS.md)** - 完整参数说明
+- **[TROUBLESHOOTING.md](references/TROUBLESHOOTING.md)** - 故障排查指南
+- **[BEST_PRACTICES.md](references/BEST_PRACTICES.md)** - 使用最佳实践
+- **[ADVANCED.md](references/ADVANCED.md)** - 高级功能详解
 
 ### 核心技术
-- **[SMART_MATCHING_GUIDE.md](SMART_MATCHING_GUIDE.md)** - 智能匹配详解
-- **[TRACKED_CHANGES_SOLUTION.md](TRACKED_CHANGES_SOLUTION.md)** - 追踪修订处理
-- **[PLACEHOLDER_FILTER_GUIDE.md](PLACEHOLDER_FILTER_GUIDE.md)** - 占位符过滤
-- **[MAPPING_MECHANISM_EXPLAINED.md](MAPPING_MECHANISM_EXPLAINED.md)** - 映射机制详解
+- **[SMART_MATCHING_GUIDE.md](references/SMART_MATCHING_GUIDE.md)** - 智能匹配详解
+- **[TRACKED_CHANGES_SOLUTION.md](references/TRACKED_CHANGES_SOLUTION.md)** - 追踪修订处理
+- **[PLACEHOLDER_FILTER_GUIDE.md](references/PLACEHOLDER_FILTER_GUIDE.md)** - 占位符过滤
+- **[MAPPING_MECHANISM_EXPLAINED.md](references/MAPPING_MECHANISM_EXPLAINED.md)** - 映射机制详解
 
 ---
 
@@ -148,11 +178,22 @@ PY26 正式啟動！作為創辦人理事會領袖...
 ### 遇到更新失败？
 运行诊断工具：
 ```bash
-python3 analyze_word_structure_deep.py \
+python3 scripts/analyze_word_structure_deep.py \
   --input "input.docx" \
   --sample-segment "segment-id" \
   --verbose
 ```
+
+### 文檔包含換行符？
+如果遇到「文本不匹配」錯誤，且文檔中有內嵌換行符（Shift+Enter），使用換行符處理腳本：
+```bash
+python3 scripts/handle_text_with_linebreaks.py \
+  --input "input.docx" \
+  --translations "translations.json" \
+  --output "output.docx"
+```
+
+詳見：[TROUBLESHOOTING.md - 問題 10](references/TROUBLESHOOTING.md)
 
 ### 行数不匹配？
 检查新翻译文件是否包含占位符行。使用 `--verbose` 查看哪些行被过滤。
@@ -169,5 +210,3 @@ python3 analyze_word_structure_deep.py \
 - 占位符自动过滤
 - 一键执行脚本
 - 深度诊断工具
-
-查看 [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) 了解从 v1.0 迁移指南。

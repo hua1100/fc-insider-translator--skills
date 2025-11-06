@@ -112,6 +112,13 @@ def check_dependencies():
     return True
 
 
+def get_script_path(script_name):
+    """获取脚本的完整路径"""
+    # 获取当前脚本所在目录
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(current_dir, script_name)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='FC Insider 翻译更新 - 一键执行完整工作流程',
@@ -161,8 +168,8 @@ def main():
     )
     parser.add_argument(
         '--author',
-        default='Translator',
-        help='追踪修订作者名称（默认：Translator）'
+        default='Claire.lee@amway.com',
+        help='追踪修订作者名称（默认：Claire.lee@amway.com）'
     )
     parser.add_argument(
         '--match-by',
@@ -234,9 +241,9 @@ def main():
 
         extract_cmd = [
             'python3',
-            'extract_table_markitdown_simple.py',
-            '--input', args.input,
-            '--output', temp_table
+            get_script_path('extract_table_markitdown_simple.py'),
+            args.input,
+            temp_table
         ]
 
         if not run_command(extract_cmd, "提取表格", args.verbose):
@@ -247,7 +254,7 @@ def main():
 
         mapping_cmd = [
             'python3',
-            'generate_translation_mapping.py',
+            get_script_path('generate_translation_mapping.py'),
             '--markdown', temp_table,
             '--new-translations', args.new_translations,
             '--output', temp_translations,
@@ -265,7 +272,7 @@ def main():
 
         update_cmd = [
             'python3',
-            'update_fc_insider_tracked.py',
+            get_script_path('update_fc_insider_tracked.py'),
             '--input', args.input,
             '--translations', temp_translations,
             '--output', args.output,

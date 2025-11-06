@@ -285,7 +285,9 @@ def update_translations(
 
     # 加载翻译
     with open(translations_path, 'r', encoding='utf-8') as f:
-        translations = json.load(f)
+        data = json.load(f)
+        # 提取 translations 数组（如果存在）
+        translations = data.get('translations', data) if isinstance(data, dict) else data
 
     # 查找表格
     table = find_table(doc)
@@ -318,8 +320,9 @@ def update_translations(
 
     for idx, translation in enumerate(translations, 1):
         segment_id = translation.get('segment_id')
-        old_text = translation.get('old_translation', '').strip()
-        new_text = translation.get('new_translation', '').strip()
+        # 支持两种键名：old_text/new_text 或 old_translation/new_translation
+        old_text = translation.get('old_text', translation.get('old_translation', '')).strip()
+        new_text = translation.get('new_text', translation.get('new_translation', '')).strip()
 
         print(f"[{idx}/{len(translations)}] 处理 {segment_id}...", end=" ")
 
@@ -405,7 +408,7 @@ def main():
     parser.add_argument('--input', required=True, help='输入 Word 文档路径')
     parser.add_argument('--translations', required=True, help='翻译映射 JSON 文件路径')
     parser.add_argument('--output', required=True, help='输出 Word 文档路径')
-    parser.add_argument('--author', default='Translator', help='追踪修订作者名称')
+    parser.add_argument('--author', default='Claire.lee@amway.com', help='追踪修订作者名称（默认：Claire.lee@amway.com）')
     parser.add_argument('--mode',
                        choices=['auto', 'read_deleted', 'read_inserted'],
                        default='auto',

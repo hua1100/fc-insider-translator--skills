@@ -4,6 +4,60 @@
 
 ---
 
+## 依赖要求
+
+在使用脚本之前，请确保安装以下依赖。
+
+### 必需依赖
+
+| 包名 | 安装命令 | 用途 |
+|------|----------|------|
+| `python-docx` | `pip install python-docx` | 读写 Word 文档 |
+| `lxml` | `pip install lxml` | XML 解析（追踪修订需要） |
+| `markitdown[docx]` | `pip install markitdown[docx]` | 提取 Word 表格（⚠️ 注意必须包含 [docx]） |
+
+### ⚠️ 重要提示
+
+**必须安装 `markitdown[docx]`，而不是 `markitdown`**
+
+```bash
+# ✓ 正确
+pip install markitdown[docx]
+
+# ✗ 错误 - 无法读取 .docx 文件
+pip install markitdown
+```
+
+`markitdown[docx]` 会额外安装：
+- `mammoth` - 用于读取 Word 文档
+- 其他 docx 处理依赖
+
+### 验证安装
+
+```bash
+# 验证所有依赖
+python3 -c "import docx, lxml, markitdown, mammoth; print('✓ 所有依赖已安装')"
+```
+
+或者使用自动检查：
+
+```bash
+# run_complete_workflow.py 会自动检查依赖
+python3 ../scripts/run_complete_workflow.py --help
+```
+
+### 可选：一次性安装
+
+```bash
+# 安装所有依赖
+pip install python-docx lxml markitdown[docx]
+
+# 或使用 requirements.txt（如果提供）
+pip install -r requirements.txt
+```
+
+---
+
 ## 通用参数
 
 适用于所有脚本的通用参数。
@@ -42,27 +96,25 @@
 ### 使用示例
 
 ```bash
-# 基本用法
-python3 run_complete_workflow.py \
+# 基本用法（使用默认作者 Claire.lee@amway.com）
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
-  --output "output.docx" \
-  --author "Gemini"
+  --output "output.docx"
 
 # 详细模式
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
-  --author "Gemini" \
   --verbose
 
-# 自定义匹配方式
-python3 run_complete_workflow.py \
+# 自定义匹配方式和作者
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
-  --author "Gemini" \
+  --author "translator@company.com" \
   --match-by index \
   --update-mode read_inserted
 ```
@@ -83,7 +135,7 @@ python3 run_complete_workflow.py \
 ### 使用示例
 
 ```bash
-python3 extract_table_markitdown_simple.py \
+python3 ../scripts/extract_table_markitdown_simple.py \
   --input "input.docx" \
   --output "extracted_table.md"
 ```
@@ -129,7 +181,7 @@ python3 extract_table_markitdown_simple.py \
 
 **示例**：
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.txt" \
   --output "translations.json" \
@@ -153,7 +205,7 @@ python3 generate_translation_mapping.py \
 
 **示例**：
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.json" \
   --output "translations.json" \
@@ -184,7 +236,7 @@ python3 generate_translation_mapping.py \
 
 **示例**：
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.txt" \
   --output "translations.json" \
@@ -246,23 +298,143 @@ python3 generate_translation_mapping.py \
 ### 使用示例
 
 ```bash
-# 自动模式（推荐）
-python3 update_fc_insider_tracked.py \
+# 自动模式（推荐，使用默认作者）
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
-  --author "Gemini" \
   --mode auto \
   --verbose
 
-# 指定模式
-python3 update_fc_insider_tracked.py \
+# 指定模式和自定义作者
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
-  --author "Gemini" \
+  --author "translator@company.com" \
   --mode read_inserted
 ```
+
+---
+
+## handle_text_with_linebreaks.py
+
+處理包含內嵌換行符的翻譯更新。專門用於處理 Word 文檔中包含 `<w:br/>` 標籤的段落。
+
+### 必需參數
+
+| 參數 | 說明 | 示例 |
+|------|------|------|
+| `--input` | 輸入 Word 文檔路徑 | `"input.docx"` |
+| `--translations` | 翻譯映射 JSON 文件路徑 | `"translations.json"` |
+| `--output` | 輸出 Word 文檔路徑 | `"output.docx"` |
+
+### 可選參數
+
+| 參數 | 說明 | 默認值 |
+|------|------|--------|
+| `--author` | 追踪修訂作者名稱 | `Claire.lee@amway.com` |
+| `--verbose` | 顯示詳細信息 | False |
+
+### 使用場景
+
+此腳本專門處理以下情況：
+
+1. **Word 文檔中有內嵌換行符**
+   - 段落中使用 Shift+Enter 產生的軟換行
+   - XML 中表示為 `<w:br/>` 標籤
+
+2. **標準工作流程失敗**
+   - 提示「文本不匹配」錯誤
+   - MarkItDown 提取時將換行符轉換為空格
+
+3. **需要保留換行符格式**
+   - 追踪修訂需要正確顯示換行符位置
+   - 輸出文檔需要與原文檔格式一致
+
+### 工作原理
+
+1. 讀取翻譯映射文件（與 `update_fc_insider_tracked.py` 格式相同）
+2. 檢測文本中的換行符（`\n`）
+3. 將換行符轉換為 Word XML 中的 `<w:br/>` 標籤
+4. 正確應用追踪修訂（`<w:del>` 和 `<w:ins>`）
+5. 保留原文檔的換行符格式
+
+### 使用示例
+
+```bash
+# 基本用法（使用默認作者）
+python3 ../scripts/handle_text_with_linebreaks.py \
+  --input "input.docx" \
+  --translations "translations.json" \
+  --output "output.docx"
+
+# 詳細模式，查看換行符處理過程
+python3 ../scripts/handle_text_with_linebreaks.py \
+  --input "input.docx" \
+  --translations "translations.json" \
+  --output "output.docx" \
+  --verbose
+
+# 自定義作者
+python3 ../scripts/handle_text_with_linebreaks.py \
+  --input "input.docx" \
+  --translations "translations.json" \
+  --output "output.docx" \
+  --author "translator@company.com" \
+  --verbose
+```
+
+### 翻譯文件格式
+
+在 `translations.json` 中，使用真實的換行符（不是 `\n` 字面字符）：
+
+```json
+{
+  "translations": [
+    {
+      "segment_id": "abc123",
+      "old_text": "第一行\n第二行",
+      "new_text": "First line\nSecond line"
+    }
+  ]
+}
+```
+
+或在 `new_translations.txt` 中：
+```txt
+第一行
+第二行
+```
+
+### 與標準工作流程的區別
+
+| 特性 | 標準工作流程 | 換行符處理腳本 |
+|------|-------------|---------------|
+| 處理換行符 | ❌ 轉換為空格 | ✅ 保留為 `<w:br/>` |
+| MarkItDown 提取 | ✅ 使用 | ❌ 不使用 |
+| 文本匹配 | 基於提取的文本 | 基於 JSON 映射 |
+| 適用場景 | 一般翻譯更新 | 包含換行符的文檔 |
+
+### 注意事項
+
+1. **必須先生成 translations.json**：
+   ```bash
+   # 先運行前兩步生成映射文件
+   python3 scripts/extract_table_markitdown_simple.py ...
+   python3 scripts/generate_translation_mapping.py ...
+
+   # 然後使用此腳本替代 update_fc_insider_tracked.py
+   python3 scripts/handle_text_with_linebreaks.py ...
+   ```
+
+2. **換行符格式**：
+   - 在 JSON 中使用真實的 `\n` 字符（ASCII 10）
+   - 不是字面上的反斜杠加 n
+
+3. **XML 特殊字符**：
+   - 腳本會自動處理 XML 轉義（`&`, `<`, `>`, etc.）
+   - 無需手動轉義
 
 ---
 
@@ -289,13 +461,13 @@ python3 update_fc_insider_tracked.py \
 
 ```bash
 # 分析指定行
-python3 analyze_word_structure_deep.py \
+python3 ../scripts/analyze_word_structure_deep.py \
   --input "input.docx" \
   --sample-segment "1360baf04e-73fb-432d-abf1-a0887de5f16a" \
   --verbose
 
 # 导出 XML 和 JSON
-python3 analyze_word_structure_deep.py \
+python3 ../scripts/analyze_word_structure_deep.py \
   --input "input.docx" \
   --sample-segment "1360baf04e-73fb-432d-abf1-a0887de5f16a" \
   --export-xml \
@@ -310,7 +482,7 @@ python3 analyze_word_structure_deep.py \
 
 ```bash
 # 使用详细模式，查看完整过程
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -322,7 +494,7 @@ python3 run_complete_workflow.py \
 
 ```bash
 # 使用默认设置即可
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -333,7 +505,7 @@ python3 run_complete_workflow.py \
 
 ```bash
 # 保留临时文件，详细输出
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -346,7 +518,7 @@ python3 run_complete_workflow.py \
 
 ```bash
 # 使用智能匹配
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \

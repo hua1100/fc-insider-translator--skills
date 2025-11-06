@@ -197,7 +197,7 @@ PY26 正式啟動！作為創辦人理事會領袖...  → 不是占位符
 ### 禁用过滤（不推荐）
 
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.txt" \
   --output "translations.json" \
@@ -348,12 +348,12 @@ def clear_and_apply_tracked_change(cell, old_text, new_text, author):
 ```xml
 <!-- 应用后的 XML 结构 -->
 <w:p>
-  <w:del w:author="Gemini" w:date="2025-01-06T10:30:00">
+  <w:del w:author="Claire.lee@amway.com" w:date="2025-01-06T10:30:00">
     <w:r>
       <w:delText>PY26 已至，作為全球政策諮詢委員...</w:delText>
     </w:r>
   </w:del>
-  <w:ins w:author="Gemini" w:date="2025-01-06T10:30:00">
+  <w:ins w:author="Claire.lee@amway.com" w:date="2025-01-06T10:30:00">
     <w:r>
       <w:t>PY26 正式啟動！作為創辦人理事會...</w:t>
     </w:r>
@@ -441,13 +441,13 @@ def generate_solution_recommendation(analysis):
 
 ```bash
 # 基本分析
-python3 analyze_word_structure_deep.py \
+python3 ../scripts/analyze_word_structure_deep.py \
   --input "input.docx" \
   --sample-segment "1360baf04e-73fb-432d-abf1-a0887de5f16a" \
   --verbose
 
 # 导出 XML 和 JSON
-python3 analyze_word_structure_deep.py \
+python3 ../scripts/analyze_word_structure_deep.py \
   --input "input.docx" \
   --sample-segment "1360baf04e-73fb-432d-abf1-a0887de5f16a" \
   --export-xml \
@@ -489,7 +489,7 @@ def auto_convert_text_to_json(text_dict, old_table):
 
 ```bash
 # 纯文本文件 + segment_id 匹配
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.txt" \  # 纯文本！
   --output "translations.json" \

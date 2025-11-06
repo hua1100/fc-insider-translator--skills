@@ -44,7 +44,7 @@
 ### 基本用法（推荐）
 
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown extracted_table.md \
   --new-translations new_translations.txt \
   --output translations.json \
@@ -131,7 +131,7 @@ Q6 白金資格者亦可貢獻至資格積分（QC）統計。
 ### 步骤 2: 运行生成脚本
 
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown extracted_table.md \
   --new-translations new_translations.txt \
   --output translations.json \
@@ -152,14 +152,15 @@ python3 generate_translation_mapping.py \
 使用生成的 `translations.json` 更新 Word 文档：
 
 ```bash
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations translations.json \
   --output "output.docx" \
-  --author "Gemini" \
   --mode read_inserted \
   --verbose
 ```
+
+**提示**：默认作者为 `Claire.lee@amway.com`，可以省略 `--author` 参数。
 
 ---
 
@@ -170,7 +171,7 @@ python3 update_fc_insider_tracked.py \
 如果你想保留占位符行（不推荐），可以使用：
 
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown extracted_table.md \
   --new-translations new_translations.txt \
   --output translations.json \
@@ -182,7 +183,7 @@ python3 generate_translation_mapping.py \
 只预览而不保存文件：
 
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown extracted_table.md \
   --new-translations new_translations.txt \
   --preview-only \
