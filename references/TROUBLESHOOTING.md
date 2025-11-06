@@ -401,6 +401,176 @@ python3 ../scripts/run_complete_workflow.py \
 
 ---
 
+## 问题 8: MarkItDown docx 依赖缺失
+
+### 症状
+
+```
+MissingDependencyException: DocxConverter recognized the input as a potential .docx file,
+but the dependencies needed to read .docx files have not been installed.
+```
+
+或者：
+
+```
+✗ 错误：提取表格失败
+  退出码: 1
+```
+
+### 原因
+
+只安装了 `markitdown`，但没有安装处理 Word 文档所需的可选依赖 `markitdown[docx]`。
+
+### 解决方案
+
+安装完整的 MarkItDown docx 支持：
+
+```bash
+pip install markitdown[docx]
+```
+
+这会安装：
+- `mammoth` - 用于读取 .docx 文件
+- `lxml` - XML 解析库
+
+**验证安装**：
+
+```bash
+python3 -c "import mammoth; print('✓ mammoth installed')"
+```
+
+**替代方案**：安装所有可选依赖
+
+```bash
+pip install markitdown[all]
+```
+
+---
+
+## 问题 9: 新翻译文件格式不正确
+
+### 症状
+
+1. **低相似度警告很多**：
+   ```
+   ⚠️  警告：5 个配对的相似度较低（< 15%）
+   ```
+
+2. **输出文档包含多余字符**：
+   Word 文档中出现表格边框符号 `│` 或行号
+
+3. **翻译内容被截断**
+
+### 原因
+
+新翻译文件包含了不应该有的格式字符，例如：
+
+**❌ 错误格式**：
+```txt
+│     1 誠摯邀請                                                             │
+│     3 安麗事業的獨特之處，在於社群的凝聚力與人際連結...                      │
+│       諮詢委員會領導人，正是每天將這份力量轉化為實際成果的中堅力量。您用行 │
+```
+
+问题：
+- 包含表格边框 `│`
+- 包含行號 `1`, `3`
+- 包含多余的空格
+
+### 解决方案
+
+#### 方案 1: 清理新翻译文件（推荐）
+
+**✓ 正确格式**：
+```txt
+誠摯邀請
+安麗事業的獨特之處，在於社群的凝聚力與人際連結，而像您這樣的全球政策諮詢委員會領導人，正是每天將這份力量轉化為實際成果的中堅力量。您用行動向我們證明:團結一心、目標一致,就能攜手成就任何夢想。
+我們誠摯期待2026年在義大利薩丁尼亞島——那令人驚嘆的翡翠海岸——與您相聚。
+```
+
+**要求**：
+- ✅ 每行一个完整的翻译
+- ✅ 不包含行号
+- ✅ 不包含表格边框字符
+- ✅ 不包含占位符行（如 `"<0/>"在第 <1/> 頁`）
+- ✅ 翻译内容完整，不被截断
+
+#### 方案 2: 使用清理脚本（推荐）
+
+使用提供的清理脚本自动处理：
+
+```bash
+python3 ../scripts/clean_translation_text.py \
+  new_translations.txt \
+  new_translations_clean.txt \
+  --verbose
+```
+
+脚本会自动：
+- ✓ 删除表格边框字符 `│`
+- ✓ 删除行号
+- ✓ 删除多余空格
+- ✓ 跳过空行
+- ✓ 跳过占位符行
+- ✓ 显示统计信息
+
+输出示例：
+```
+统计:
+  总行数: 17
+  空行: 6
+  占位符行: 1
+  保留行数: 10
+```
+
+#### 方案 3: 手动使用 sed 清理
+
+如果从 Word 或 Excel 复制的翻译，使用以下步骤手动清理：
+
+1. **删除表格边框**：
+   ```bash
+   # 使用 sed 删除边框字符
+   sed 's/│//g' new_translations.txt > cleaned.txt
+   ```
+
+2. **删除行号**：
+   ```bash
+   # 删除开头的数字和空格
+   sed 's/^[ ]*[0-9][ ]*//g' cleaned.txt > final.txt
+   ```
+
+3. **删除多余空格**：
+   ```bash
+   # 删除行首和行尾空格
+   sed 's/^[ ]*//g; s/[ ]*$//g' final.txt > new_translations_clean.txt
+   ```
+
+#### 方案 4: 检查完整性
+
+**验证翻译是否完整**：
+
+```bash
+# 查看每行长度
+awk '{print NR": "length($0)" chars"}' new_translations.txt
+
+# 查看是否有截断（行尾是否有省略号）
+grep '…$\|...$' new_translations.txt
+```
+
+**检查行数**：
+
+运行映射生成时会显示：
+```
+✓ 过滤后保留 9 行（跳过了占位符行）
+✓ 加载 17 个译文
+```
+
+如果新翻译行数 ≠ 过滤后的行数，说明：
+- 新翻译包含了占位符
+- 或新翻译行数不对
+
+---
+
 ## 调试技巧
 
 ### 1. 总是使用 --verbose

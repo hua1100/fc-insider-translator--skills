@@ -15,6 +15,20 @@ version: 2.0
 
 ---
 
+## 📦 安装依赖
+
+首次使用前，安装必需的依赖：
+
+```bash
+pip install python-docx lxml markitdown[docx]
+```
+
+⚠️ **重要**：必须安装 `markitdown[docx]`（包含 [docx]），而不是 `markitdown`
+
+完整依赖说明见 [PARAMETERS.md](references/PARAMETERS.md#依赖要求)
+
+---
+
 ## 🚀 快速开始
 
 ### 方式 1: 一键执行（推荐）

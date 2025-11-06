@@ -4,6 +4,60 @@
 
 ---
 
+## 依赖要求
+
+在使用脚本之前，请确保安装以下依赖。
+
+### 必需依赖
+
+| 包名 | 安装命令 | 用途 |
+|------|----------|------|
+| `python-docx` | `pip install python-docx` | 读写 Word 文档 |
+| `lxml` | `pip install lxml` | XML 解析（追踪修订需要） |
+| `markitdown[docx]` | `pip install markitdown[docx]` | 提取 Word 表格（⚠️ 注意必须包含 [docx]） |
+
+### ⚠️ 重要提示
+
+**必须安装 `markitdown[docx]`，而不是 `markitdown`**
+
+```bash
+# ✓ 正确
+pip install markitdown[docx]
+
+# ✗ 错误 - 无法读取 .docx 文件
+pip install markitdown
+```
+
+`markitdown[docx]` 会额外安装：
+- `mammoth` - 用于读取 Word 文档
+- 其他 docx 处理依赖
+
+### 验证安装
+
+```bash
+# 验证所有依赖
+python3 -c "import docx, lxml, markitdown, mammoth; print('✓ 所有依赖已安装')"
+```
+
+或者使用自动检查：
+
+```bash
+# run_complete_workflow.py 会自动检查依赖
+python3 ../scripts/run_complete_workflow.py --help
+```
+
+### 可选：一次性安装
+
+```bash
+# 安装所有依赖
+pip install python-docx lxml markitdown[docx]
+
+# 或使用 requirements.txt（如果提供）
+pip install -r requirements.txt
+```
+
+---
+
 ## 通用参数
 
 适用于所有脚本的通用参数。
