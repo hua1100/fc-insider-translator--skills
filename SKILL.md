@@ -1,10 +1,10 @@
 ---
-name: fc-insider-translator
-description: 处理 FC Insider 四列表格 Word 文档的翻译更新。使用追踪修订标记变更，智能匹配新旧翻译（顺序无关），自动过滤占位符行。当用户需要更新 Word 文档翻译、处理 DOCX 表格翻译、提到"tracked changes"、"追踪修订"、"translation mapping"、"翻译对照"时使用。
+name: fc-document-tracking-changes
+description: 处理 Word 文档翻译更新，使用追踪修订标记变更。支持智能匹配新旧翻译（顺序无关）、自动过滤占位符行、处理已有追踪修订的文档。当用户需要更新 Word 文档翻译、处理 DOCX 表格翻译、提到"tracked changes"、"追踪修订"、"translation mapping"、"翻译对照"时使用。
 version: 2.0
 ---
 
-# FC Insider 翻译更新 Skill
+# FC Document Tracking Changes Skill
 
 ## 🎯 核心功能
 
