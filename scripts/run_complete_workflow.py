@@ -168,8 +168,8 @@ def main():
     )
     parser.add_argument(
         '--author',
-        default='Translator',
-        help='追踪修订作者名称（默认：Translator）'
+        default='Claire',
+        help='追踪修订作者名称（默认：Claire）'
     )
     parser.add_argument(
         '--match-by',

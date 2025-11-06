@@ -408,7 +408,7 @@ def main():
     parser.add_argument('--input', required=True, help='输入 Word 文档路径')
     parser.add_argument('--translations', required=True, help='翻译映射 JSON 文件路径')
     parser.add_argument('--output', required=True, help='输出 Word 文档路径')
-    parser.add_argument('--author', default='Translator', help='追踪修订作者名称')
+    parser.add_argument('--author', default='Claire', help='追踪修订作者名称（默认：Claire）')
     parser.add_argument('--mode',
                        choices=['auto', 'read_deleted', 'read_inserted'],
                        default='auto',

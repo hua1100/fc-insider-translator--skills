@@ -37,9 +37,10 @@ pip install python-docx lxml markitdown[docx]
 python3 scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
-  --output "output.docx" \
-  --author "Your Name"
+  --output "output.docx"
 ```
+
+**提示**：默认作者为 "Claire"，可以省略 `--author` 参数。如需修改作者，添加 `--author "Your Name"`
 
 **就这么简单！** 脚本会自动完成表格提取、智能匹配、应用追踪修订。
 
@@ -59,12 +60,11 @@ python3 scripts/generate_translation_mapping.py \
   --match-by smart \
   --verbose
 
-# 步骤 3: 应用翻译
+# 步骤 3: 应用翻译（默认作者：Claire）
 python3 scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
-  --author "Your Name" \
   --mode auto \
   --verbose
 ```
@@ -144,7 +144,6 @@ PY26 正式啟動！作為創辦人理事會領袖...
 - **[TROUBLESHOOTING.md](references/TROUBLESHOOTING.md)** - 故障排查指南
 - **[BEST_PRACTICES.md](references/BEST_PRACTICES.md)** - 使用最佳实践
 - **[ADVANCED.md](references/ADVANCED.md)** - 高级功能详解
-- **[MIGRATION_GUIDE.md](references/MIGRATION_GUIDE.md)** - 从旧版本迁移
 
 ### 核心技术
 - **[SMART_MATCHING_GUIDE.md](references/SMART_MATCHING_GUIDE.md)** - 智能匹配详解
@@ -183,5 +182,3 @@ python3 scripts/analyze_word_structure_deep.py \
 - 占位符自动过滤
 - 一键执行脚本
 - 深度诊断工具
-
-查看 [MIGRATION_GUIDE.md](references/MIGRATION_GUIDE.md) 了解从 v1.0 迁移指南。
