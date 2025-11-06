@@ -72,7 +72,7 @@
 #### 基本用法（推荐）
 
 ```bash
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "/Users/hua/md腳本/FCInsider_Dec2025_Issue9_翻譯修訂版.docx" \
   --translations "/Users/hua/md腳本/translations.json" \
   --output "/Users/hua/md腳本/output_tracked.docx" \
@@ -92,7 +92,7 @@ python3 update_fc_insider_tracked.py \
 **从删除的文本读取**（如果你的 translations.json 中的 old_translation 来自 `<w:del>`）：
 
 ```bash
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
@@ -104,7 +104,7 @@ python3 update_fc_insider_tracked.py \
 **从插入的文本读取**（如果你的 translations.json 中的 old_translation 来自 `<w:ins>`）：
 
 ```bash
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
@@ -236,7 +236,7 @@ FC Insider 翻译更新 - 方案 4 (处理追踪修订)
 **A**: 运行深度分析工具：
 
 ```bash
-python3 analyze_word_structure_deep.py \
+python3 ../scripts/analyze_word_structure_deep.py \
   --input "input.docx" \
   --sample-segment "your-segment-id" \
   --export-xml
@@ -299,7 +299,7 @@ python3 analyze_word_structure_deep.py \
 ### 步骤 3: 运行脚本
 
 ```bash
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "/Users/hua/md腳本/FCInsider_Dec2025_Issue9_翻譯修訂版.docx" \
   --translations "/Users/hua/md腳本/translations.json" \
   --output "/Users/hua/md腳本/output_tracked.docx" \

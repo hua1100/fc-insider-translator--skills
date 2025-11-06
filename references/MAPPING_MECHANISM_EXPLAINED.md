@@ -85,7 +85,7 @@ for idx, row in enumerate(old_table):
 ### 命令示例
 
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown extracted_table.md \
   --new-translations new_translations.json \
   --output translations.json \
@@ -225,7 +225,7 @@ PY26 正式啟動！作為創辦人理事會領袖...    ← 第1行
 ### 命令示例
 
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown extracted_table.md \
   --new-translations new_translations.txt \
   --output translations.json \
@@ -256,7 +256,7 @@ python3 generate_translation_mapping.py \
 
 ```bash
 # 步骤 1: 提取表格
-python3 extract_table_markitdown_simple.py \
+python3 ../scripts/extract_table_markitdown_simple.py \
   --input input.docx \
   --output extracted_table.md
 
@@ -268,7 +268,7 @@ python3 extract_table_markitdown_simple.py \
 }
 
 # 步骤 3: 生成对照表（顺序无关）
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown extracted_table.md \
   --new-translations new_translations.json \
   --output translations.json \
@@ -276,7 +276,7 @@ python3 generate_translation_mapping.py \
   --verbose
 
 # 步骤 4: 应用翻译
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input input.docx \
   --translations translations.json \
   --output output.docx \
@@ -288,12 +288,12 @@ python3 update_fc_insider_tracked.py \
 
 ```bash
 # 步骤 1: 提取表格
-python3 extract_table_markitdown_simple.py \
+python3 ../scripts/extract_table_markitdown_simple.py \
   --input input.docx \
   --output extracted_table.md
 
 # 步骤 2: 查看过滤后的行数
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown extracted_table.md \
   --new-translations dummy.txt \
   --preview-only \
@@ -308,7 +308,7 @@ PY26 正式啟動！...
 ...（共13行）
 
 # 步骤 4: 生成对照表（顺序必须一致）
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown extracted_table.md \
   --new-translations new_translations.txt \
   --output translations.json \
@@ -316,7 +316,7 @@ python3 generate_translation_mapping.py \
   --verbose
 
 # 步骤 5: 应用翻译
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input input.docx \
   --translations translations.json \
   --output output.docx \
@@ -398,7 +398,7 @@ with open('new_translations.json', 'w', encoding='utf-8') as f:
 使用 `--preview-only` 先预览：
 
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown extracted_table.md \
   --new-translations new_translations.json \
   --match-by segment_id \

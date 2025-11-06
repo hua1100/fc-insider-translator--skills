@@ -69,7 +69,7 @@ python3 extract_table_markitdown.py \
   --input "input.docx" \
   --output "table.md"
 
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.txt" \
   --output "translations.json"
@@ -86,7 +86,7 @@ python3 update_fc_insider.py \
 
 ```bash
 # 新版：一键完成
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_trans.txt" \
   --output "output.docx" \
@@ -98,12 +98,12 @@ python3 run_complete_workflow.py \
 
 ```bash
 # 步骤 1: 提取表格
-python3 extract_table_markitdown_simple.py \
+python3 ../scripts/extract_table_markitdown_simple.py \
   --input "input.docx" \
   --output "table.md"
 
 # 步骤 2: 生成映射（智能匹配）
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.txt" \
   --output "translations.json" \
@@ -111,7 +111,7 @@ python3 generate_translation_mapping.py \
   --verbose             # 新增参数！
 
 # 步骤 3: 应用翻译
-python3 update_fc_insider_tracked.py \  # 新脚本名！
+python3 ../scripts/update_fc_insider_tracked.py \  # 新脚本名！
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
@@ -213,7 +213,7 @@ python3 update_fc_insider_tracked.py \  # 新脚本名！
 
 **新版**：
 ```bash
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_trans.txt" \
   --output "output.docx" \
@@ -229,7 +229,7 @@ python3 run_complete_workflow.py \
 python3 extract_table_markitdown.py --input "input.docx" --output "table.md"
 
 # 步骤 2
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.txt" \
   --output "translations.json"
@@ -243,7 +243,7 @@ python3 update_fc_insider.py \
 
 **新版（一键）**：
 ```bash
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_trans.txt" \
   --output "output.docx" \
@@ -254,12 +254,12 @@ python3 run_complete_workflow.py \
 **新版（分步，如果需要）**：
 ```bash
 # 步骤 1
-python3 extract_table_markitdown_simple.py \
+python3 ../scripts/extract_table_markitdown_simple.py \
   --input "input.docx" \
   --output "table.md"
 
 # 步骤 2（智能匹配）
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.txt" \
   --output "translations.json" \
@@ -267,7 +267,7 @@ python3 generate_translation_mapping.py \
   --verbose
 
 # 步骤 3（追踪修订处理）
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
@@ -286,7 +286,7 @@ python3 update_fc_insider_tracked.py \
 **新版**：
 ```bash
 # 自动检测并处理
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_trans.txt" \
   --output "output.docx" \
@@ -298,7 +298,7 @@ python3 run_complete_workflow.py \
 或使用分步执行：
 ```bash
 # 步骤 3 使用 update_fc_insider_tracked.py
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
@@ -317,7 +317,7 @@ python3 update_fc_insider_tracked.py \
 **新版**：
 ```bash
 # 使用智能匹配
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_trans.txt" \
   --output "output.docx" \
@@ -336,12 +336,12 @@ v2.0 **完全兼容** v1.0 的使用方式：
 
 ```bash
 # v1.0 风格的命令在 v2.0 中仍然有效
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.txt" \
   --output "translations.json"
 # ↓ 等同于
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.txt" \
   --output "translations.json" \
@@ -380,7 +380,7 @@ v1.0 和 v2.0 使用相同的文件格式：
 
 ```bash
 # 直接使用旧的 translations.json
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "old_translations.json" \  # 旧文件
   --output "output.docx" \
@@ -417,7 +417,7 @@ python3 update_fc_insider_tracked.py \
 ### 阶段 1: 尝试一键执行（5 分钟）
 
 ```bash
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_trans.txt" \
   --output "output.docx" \
@@ -430,7 +430,7 @@ python3 run_complete_workflow.py \
 ### 阶段 2: 启用智能匹配（10 分钟）
 
 ```bash
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_trans.txt" \
   --output "output.docx" \
@@ -459,7 +459,7 @@ python3 run_complete_workflow.py \
 
 ### 查看完整文档
 
-- **[SKILL.md](SKILL.md)** - 快速开始
+- **[SKILL.md](../SKILL.md)** - 快速开始
 - **[PARAMETERS.md](PARAMETERS.md)** - 参数说明
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - 故障排查
 - **[BEST_PRACTICES.md](BEST_PRACTICES.md)** - 最佳实践

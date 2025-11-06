@@ -20,7 +20,7 @@ version: 2.0
 ### 方式 1: 一键执行（推荐）
 
 ```bash
-python3 run_complete_workflow.py \
+python3 scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -33,12 +33,12 @@ python3 run_complete_workflow.py \
 
 ```bash
 # 步骤 1: 提取表格
-python3 extract_table_markitdown_simple.py \
+python3 scripts/extract_table_markitdown_simple.py \
   --input "input.docx" \
   --output "extracted_table.md"
 
 # 步骤 2: 生成翻译映射（智能匹配）
-python3 generate_translation_mapping.py \
+python3 scripts/generate_translation_mapping.py \
   --markdown "extracted_table.md" \
   --new-translations "new_translations.txt" \
   --output "translations.json" \
@@ -46,7 +46,7 @@ python3 generate_translation_mapping.py \
   --verbose
 
 # 步骤 3: 应用翻译
-python3 update_fc_insider_tracked.py \
+python3 scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
@@ -126,17 +126,17 @@ PY26 正式啟動！作為創辦人理事會領袖...
 ## 📚 完整文档
 
 ### 详细指南
-- **[PARAMETERS.md](PARAMETERS.md)** - 完整参数说明
-- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - 故障排查指南
-- **[BEST_PRACTICES.md](BEST_PRACTICES.md)** - 使用最佳实践
-- **[ADVANCED.md](ADVANCED.md)** - 高级功能详解
-- **[MIGRATION_GUIDE.md](MIGRATION_GUIDE.md)** - 从旧版本迁移
+- **[PARAMETERS.md](references/PARAMETERS.md)** - 完整参数说明
+- **[TROUBLESHOOTING.md](references/TROUBLESHOOTING.md)** - 故障排查指南
+- **[BEST_PRACTICES.md](references/BEST_PRACTICES.md)** - 使用最佳实践
+- **[ADVANCED.md](references/ADVANCED.md)** - 高级功能详解
+- **[MIGRATION_GUIDE.md](references/MIGRATION_GUIDE.md)** - 从旧版本迁移
 
 ### 核心技术
-- **[SMART_MATCHING_GUIDE.md](SMART_MATCHING_GUIDE.md)** - 智能匹配详解
-- **[TRACKED_CHANGES_SOLUTION.md](TRACKED_CHANGES_SOLUTION.md)** - 追踪修订处理
-- **[PLACEHOLDER_FILTER_GUIDE.md](PLACEHOLDER_FILTER_GUIDE.md)** - 占位符过滤
-- **[MAPPING_MECHANISM_EXPLAINED.md](MAPPING_MECHANISM_EXPLAINED.md)** - 映射机制详解
+- **[SMART_MATCHING_GUIDE.md](references/SMART_MATCHING_GUIDE.md)** - 智能匹配详解
+- **[TRACKED_CHANGES_SOLUTION.md](references/TRACKED_CHANGES_SOLUTION.md)** - 追踪修订处理
+- **[PLACEHOLDER_FILTER_GUIDE.md](references/PLACEHOLDER_FILTER_GUIDE.md)** - 占位符过滤
+- **[MAPPING_MECHANISM_EXPLAINED.md](references/MAPPING_MECHANISM_EXPLAINED.md)** - 映射机制详解
 
 ---
 
@@ -148,7 +148,7 @@ PY26 正式啟動！作為創辦人理事會領袖...
 ### 遇到更新失败？
 运行诊断工具：
 ```bash
-python3 analyze_word_structure_deep.py \
+python3 scripts/analyze_word_structure_deep.py \
   --input "input.docx" \
   --sample-segment "segment-id" \
   --verbose
@@ -170,4 +170,4 @@ python3 analyze_word_structure_deep.py \
 - 一键执行脚本
 - 深度诊断工具
 
-查看 [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) 了解从 v1.0 迁移指南。
+查看 [MIGRATION_GUIDE.md](references/MIGRATION_GUIDE.md) 了解从 v1.0 迁移指南。

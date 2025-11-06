@@ -42,7 +42,7 @@
 ### 完整命令
 
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown extracted_table.md \
   --new-translations new_translations.txt \
   --output translations.json \
@@ -153,7 +153,7 @@ python3 generate_translation_mapping.py \
 ### 步骤 1: 提取表格
 
 ```bash
-python3 extract_table_markitdown_simple.py \
+python3 ../scripts/extract_table_markitdown_simple.py \
   --input "/Users/hua/md腳本/FCInsider_Dec2025_Issue9_翻譯修訂版.docx" \
   --output extracted_table.md
 ```
@@ -188,7 +188,7 @@ Q6 白金資格者亦可貢獻至資格積分（QC）統計。
 ### 步骤 3: 智能匹配生成对照表
 
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown extracted_table.md \
   --new-translations new_translations.txt \
   --output translations.json \
@@ -205,7 +205,7 @@ python3 generate_translation_mapping.py \
 ### 步骤 5: 应用翻译
 
 ```bash
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "/Users/hua/md腳本/FCInsider_Dec2025_Issue9_翻譯修訂版.docx" \
   --translations translations.json \
   --output "/Users/hua/md腳本/output_final.docx" \

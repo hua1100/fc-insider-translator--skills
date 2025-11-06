@@ -43,14 +43,14 @@
 
 ```bash
 # 基本用法
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
   --author "Gemini"
 
 # 详细模式
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -58,7 +58,7 @@ python3 run_complete_workflow.py \
   --verbose
 
 # 自定义匹配方式
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -83,7 +83,7 @@ python3 run_complete_workflow.py \
 ### 使用示例
 
 ```bash
-python3 extract_table_markitdown_simple.py \
+python3 ../scripts/extract_table_markitdown_simple.py \
   --input "input.docx" \
   --output "extracted_table.md"
 ```
@@ -129,7 +129,7 @@ python3 extract_table_markitdown_simple.py \
 
 **示例**：
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.txt" \
   --output "translations.json" \
@@ -153,7 +153,7 @@ python3 generate_translation_mapping.py \
 
 **示例**：
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.json" \
   --output "translations.json" \
@@ -184,7 +184,7 @@ python3 generate_translation_mapping.py \
 
 **示例**：
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "table.md" \
   --new-translations "new_trans.txt" \
   --output "translations.json" \
@@ -247,7 +247,7 @@ python3 generate_translation_mapping.py \
 
 ```bash
 # 自动模式（推荐）
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
@@ -256,7 +256,7 @@ python3 update_fc_insider_tracked.py \
   --verbose
 
 # 指定模式
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
@@ -289,13 +289,13 @@ python3 update_fc_insider_tracked.py \
 
 ```bash
 # 分析指定行
-python3 analyze_word_structure_deep.py \
+python3 ../scripts/analyze_word_structure_deep.py \
   --input "input.docx" \
   --sample-segment "1360baf04e-73fb-432d-abf1-a0887de5f16a" \
   --verbose
 
 # 导出 XML 和 JSON
-python3 analyze_word_structure_deep.py \
+python3 ../scripts/analyze_word_structure_deep.py \
   --input "input.docx" \
   --sample-segment "1360baf04e-73fb-432d-abf1-a0887de5f16a" \
   --export-xml \
@@ -310,7 +310,7 @@ python3 analyze_word_structure_deep.py \
 
 ```bash
 # 使用详细模式，查看完整过程
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -322,7 +322,7 @@ python3 run_complete_workflow.py \
 
 ```bash
 # 使用默认设置即可
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -333,7 +333,7 @@ python3 run_complete_workflow.py \
 
 ```bash
 # 保留临时文件，详细输出
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -346,7 +346,7 @@ python3 run_complete_workflow.py \
 
 ```bash
 # 使用智能匹配
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \

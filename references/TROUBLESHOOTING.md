@@ -29,7 +29,7 @@
 #### 方案 1: 使用智能匹配（推荐）
 
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "extracted_table.md" \
   --new-translations "new_translations.txt" \
   --output "translations.json" \
@@ -49,7 +49,7 @@ python3 generate_translation_mapping.py \
 
 使用 `--verbose` 查看哪些行被过滤：
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "extracted_table.md" \
   --new-translations "new_translations.txt" \
   --output "translations.json" \
@@ -107,7 +107,7 @@ python3 generate_translation_mapping.py \
 #### 步骤 1: 运行诊断工具
 
 ```bash
-python3 analyze_word_structure_deep.py \
+python3 ../scripts/analyze_word_structure_deep.py \
   --input "input.docx" \
   --sample-segment "segment-id-123" \
   --verbose
@@ -131,7 +131,7 @@ python3 analyze_word_structure_deep.py \
 **解决**：
 ```bash
 # 使用自动模式（推荐）
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
@@ -254,7 +254,7 @@ new_translations = smart_match_translations(
 
 然后使用 segment_id 匹配：
 ```bash
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "extracted_table.md" \
   --new-translations "new_translations.json" \
   --output "translations.json" \
@@ -296,7 +296,7 @@ pip install markitdown python-docx lxml
 #### 跳过依赖检查（不推荐）
 
 ```bash
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -326,7 +326,7 @@ auto 模式检测到了追踪修订，但读取了错误的文本来源。
 #### 步骤 1: 使用诊断工具
 
 ```bash
-python3 analyze_word_structure_deep.py \
+python3 ../scripts/analyze_word_structure_deep.py \
   --input "input.docx" \
   --sample-segment "segment-id-123" \
   --export-xml \
@@ -342,7 +342,7 @@ python3 analyze_word_structure_deep.py \
 #### 步骤 3: 使用正确的模式
 
 ```bash
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
@@ -375,7 +375,7 @@ Word 提示"文件已损坏"或无法打开。
 #### 方案 2: 使用 --verbose 查看错误
 
 ```bash
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -388,7 +388,7 @@ python3 run_complete_workflow.py \
 #### 方案 3: 保留临时文件
 
 ```bash
-python3 run_complete_workflow.py \
+python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
@@ -417,14 +417,14 @@ python3 run_complete_workflow.py \
 
 ```bash
 # 步骤 1
-python3 extract_table_markitdown_simple.py \
+python3 ../scripts/extract_table_markitdown_simple.py \
   --input "input.docx" \
   --output "extracted_table.md"
 
 # 检查 extracted_table.md 是否正确
 
 # 步骤 2
-python3 generate_translation_mapping.py \
+python3 ../scripts/generate_translation_mapping.py \
   --markdown "extracted_table.md" \
   --new-translations "new_translations.txt" \
   --output "translations.json" \
@@ -434,7 +434,7 @@ python3 generate_translation_mapping.py \
 # 检查 translations.json 是否正确
 
 # 步骤 3
-python3 update_fc_insider_tracked.py \
+python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
@@ -448,7 +448,7 @@ python3 update_fc_insider_tracked.py \
 遇到问题时，第一步总是运行诊断工具：
 
 ```bash
-python3 analyze_word_structure_deep.py \
+python3 ../scripts/analyze_word_structure_deep.py \
   --input "input.docx" \
   --sample-segment "segment-id" \
   --verbose
@@ -495,7 +495,7 @@ Markdown 表格格式不正确。检查表格是否包含 Segment ID 列。
 
 1. **完整的命令**
    ```bash
-   python3 run_complete_workflow.py ...（完整命令）
+   python3 ../scripts/run_complete_workflow.py ...（完整命令）
    ```
 
 2. **错误信息**
