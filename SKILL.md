@@ -117,6 +117,23 @@ output.docx (含追踪修订的输出文档)
 ### analyze_word_structure_deep.py
 深度诊断工具。分析 Word 文档结构，识别问题，提供解决方案建议。仅在遇到问题时使用。
 
+### handle_text_with_linebreaks.py
+處理包含內嵌換行符的翻譯更新。當 Word 文檔中的段落包含換行符（Shift+Enter 產生的軟換行），標準工作流程無法處理時使用。
+
+**使用場景**：
+- Word 文檔中有內嵌換行符（`<w:br/>`）
+- 標準工作流程提示「文本不匹配」錯誤
+- 需要保留原文檔的換行符格式
+
+**示例**：
+```bash
+python3 scripts/handle_text_with_linebreaks.py \
+  --input "input.docx" \
+  --translations "translations.json" \
+  --output "output.docx" \
+  --verbose
+```
+
 ---
 
 ## 📝 输入文件格式
@@ -166,6 +183,17 @@ python3 scripts/analyze_word_structure_deep.py \
   --sample-segment "segment-id" \
   --verbose
 ```
+
+### 文檔包含換行符？
+如果遇到「文本不匹配」錯誤，且文檔中有內嵌換行符（Shift+Enter），使用換行符處理腳本：
+```bash
+python3 scripts/handle_text_with_linebreaks.py \
+  --input "input.docx" \
+  --translations "translations.json" \
+  --output "output.docx"
+```
+
+詳見：[TROUBLESHOOTING.md - 問題 10](references/TROUBLESHOOTING.md)
 
 ### 行数不匹配？
 检查新翻译文件是否包含占位符行。使用 `--verbose` 查看哪些行被过滤。

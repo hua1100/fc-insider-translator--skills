@@ -317,6 +317,127 @@ python3 ../scripts/update_fc_insider_tracked.py \
 
 ---
 
+## handle_text_with_linebreaks.py
+
+處理包含內嵌換行符的翻譯更新。專門用於處理 Word 文檔中包含 `<w:br/>` 標籤的段落。
+
+### 必需參數
+
+| 參數 | 說明 | 示例 |
+|------|------|------|
+| `--input` | 輸入 Word 文檔路徑 | `"input.docx"` |
+| `--translations` | 翻譯映射 JSON 文件路徑 | `"translations.json"` |
+| `--output` | 輸出 Word 文檔路徑 | `"output.docx"` |
+
+### 可選參數
+
+| 參數 | 說明 | 默認值 |
+|------|------|--------|
+| `--author` | 追踪修訂作者名稱 | `Claire.lee@amway.com` |
+| `--verbose` | 顯示詳細信息 | False |
+
+### 使用場景
+
+此腳本專門處理以下情況：
+
+1. **Word 文檔中有內嵌換行符**
+   - 段落中使用 Shift+Enter 產生的軟換行
+   - XML 中表示為 `<w:br/>` 標籤
+
+2. **標準工作流程失敗**
+   - 提示「文本不匹配」錯誤
+   - MarkItDown 提取時將換行符轉換為空格
+
+3. **需要保留換行符格式**
+   - 追踪修訂需要正確顯示換行符位置
+   - 輸出文檔需要與原文檔格式一致
+
+### 工作原理
+
+1. 讀取翻譯映射文件（與 `update_fc_insider_tracked.py` 格式相同）
+2. 檢測文本中的換行符（`\n`）
+3. 將換行符轉換為 Word XML 中的 `<w:br/>` 標籤
+4. 正確應用追踪修訂（`<w:del>` 和 `<w:ins>`）
+5. 保留原文檔的換行符格式
+
+### 使用示例
+
+```bash
+# 基本用法（使用默認作者）
+python3 ../scripts/handle_text_with_linebreaks.py \
+  --input "input.docx" \
+  --translations "translations.json" \
+  --output "output.docx"
+
+# 詳細模式，查看換行符處理過程
+python3 ../scripts/handle_text_with_linebreaks.py \
+  --input "input.docx" \
+  --translations "translations.json" \
+  --output "output.docx" \
+  --verbose
+
+# 自定義作者
+python3 ../scripts/handle_text_with_linebreaks.py \
+  --input "input.docx" \
+  --translations "translations.json" \
+  --output "output.docx" \
+  --author "translator@company.com" \
+  --verbose
+```
+
+### 翻譯文件格式
+
+在 `translations.json` 中，使用真實的換行符（不是 `\n` 字面字符）：
+
+```json
+{
+  "translations": [
+    {
+      "segment_id": "abc123",
+      "old_text": "第一行\n第二行",
+      "new_text": "First line\nSecond line"
+    }
+  ]
+}
+```
+
+或在 `new_translations.txt` 中：
+```txt
+第一行
+第二行
+```
+
+### 與標準工作流程的區別
+
+| 特性 | 標準工作流程 | 換行符處理腳本 |
+|------|-------------|---------------|
+| 處理換行符 | ❌ 轉換為空格 | ✅ 保留為 `<w:br/>` |
+| MarkItDown 提取 | ✅ 使用 | ❌ 不使用 |
+| 文本匹配 | 基於提取的文本 | 基於 JSON 映射 |
+| 適用場景 | 一般翻譯更新 | 包含換行符的文檔 |
+
+### 注意事項
+
+1. **必須先生成 translations.json**：
+   ```bash
+   # 先運行前兩步生成映射文件
+   python3 scripts/extract_table_markitdown_simple.py ...
+   python3 scripts/generate_translation_mapping.py ...
+
+   # 然後使用此腳本替代 update_fc_insider_tracked.py
+   python3 scripts/handle_text_with_linebreaks.py ...
+   ```
+
+2. **換行符格式**：
+   - 在 JSON 中使用真實的 `\n` 字符（ASCII 10）
+   - 不是字面上的反斜杠加 n
+
+3. **XML 特殊字符**：
+   - 腳本會自動處理 XML 轉義（`&`, `<`, `>`, etc.）
+   - 無需手動轉義
+
+---
+
 ## analyze_word_structure_deep.py
 
 深度分析 Word 文档结构，诊断问题。

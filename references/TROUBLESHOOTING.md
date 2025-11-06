@@ -571,6 +571,152 @@ grep '…$\|...$' new_translations.txt
 
 ---
 
+## 问题 10: 文本包含内嵌换行符导致不匹配
+
+### 症状
+
+1. **文本匹配失败**：
+   ```
+   ❌ 错误: 在单元格中找不到旧翻译文本
+      段落ID: 10822de0b1-7cf1-41af-a29a-d42d7c9412a7
+      旧文本: 'Some text\nWith newline'
+   ```
+
+2. **MarkItDown 提取的表格与原文不一致**：
+   - Word 文档中的段落包含真实的换行符（ASCII 10）
+   - 提取的 Markdown 表格中，换行符被转换成空格
+   - 导致翻译文本无法匹配
+
+3. **手动检查发现换行符存在**：
+   ```python
+   # 检查发现文本中有真实的 \n
+   text = "第一行\n第二行"  # ASCII 10
+   ```
+
+### 原因
+
+Word 文档中的某些段落包含**内嵌的换行符**（在同一个段落内按 Shift+Enter 产生的软换行），这些换行符在 Word XML 中表示为 `<w:br/>` 标签。
+
+**问题链**：
+1. Word 文档包含 `<w:br/>` 标签（内嵌换行符）
+2. MarkItDown 提取时将 `<w:br/>` 转换为空格或忽略
+3. `generate_translation_mapping.py` 使用提取的文本（不含换行符）
+4. `update_fc_insider_tracked.py` 尝试匹配 Word 文档中的原始文本（含换行符）
+5. **匹配失败** ❌
+
+### 解决方案
+
+#### 方案 1: 预处理新翻译文件，保留换行符
+
+如果新翻译也包含换行符，确保格式一致：
+
+**✓ 正确格式**：
+```txt
+第一行内容
+第二行内容
+```
+
+**在 `new_translations.txt` 中使用真实的换行符**（不是 `\n` 字面字符）。
+
+#### 方案 2: 使用自定义脚本直接处理 Word XML
+
+如果自动化工作流程无法处理换行符，需要编写自定义 Python 脚本：
+
+```python
+from docx import Document
+from docx.oxml import parse_xml
+from docx.oxml.ns import qn
+
+def add_text_with_linebreaks(run, text):
+    """添加包含换行符的文本"""
+    parts = text.split('\n')
+    for i, part in enumerate(parts):
+        if i > 0:
+            # 添加换行符标签
+            run._element.append(parse_xml(r'<w:br xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>'))
+        run.text = run.text + part if run.text else part
+
+# 使用示例
+doc = Document('input.docx')
+table = doc.tables[0]
+cell = table.rows[10].cells[2]
+paragraph = cell.paragraphs[0]
+
+# 清除现有内容
+paragraph.clear()
+
+# 添加包含换行符的新文本
+run = paragraph.add_run()
+add_text_with_linebreaks(run, "第一行\n第二行")
+
+doc.save('output.docx')
+```
+
+#### 方案 3: 在翻译文件中使用特殊标记
+
+在 `new_translations.txt` 中使用特殊标记表示换行符：
+
+**翻译文件格式**：
+```txt
+第一行內容{{LINEBREAK}}第二行內容
+```
+
+然后修改脚本，在应用追踪修订时将 `{{LINEBREAK}}` 替换为 `<w:br/>`。
+
+#### 方案 4: 移除 Word 文档中的内嵌换行符（不推荐）
+
+如果内嵌换行符不是必需的，可以在 Word 中：
+1. 使用查找替换（Ctrl+H）
+2. 在"查找内容"中输入 `^l`（软换行符）
+3. 在"替换为"中输入空格
+4. 全部替换
+
+**注意**：这会改变文档原始格式。
+
+### 预防措施
+
+1. **检查源文档**：
+   ```python
+   # 使用 Python 检查文档中是否包含换行符
+   from docx import Document
+   doc = Document('input.docx')
+   for table in doc.tables:
+       for row in table.rows:
+           for cell in row.cells:
+               for para in cell.paragraphs:
+                   if '\n' in para.text or '\r' in para.text:
+                       print(f"发现换行符: {repr(para.text)}")
+   ```
+
+2. **使用 --verbose 模式**：
+   运行工作流程时添加 `--verbose` 参数，可以看到实际读取的文本内容
+
+3. **小批量测试**：
+   对包含特殊格式的文档，先用 1-2 行测试
+
+### 验证修复
+
+成功处理后，输出文档应该：
+- ✅ 保留原文档的换行符格式
+- ✅ 追踪修订正确应用
+- ✅ 在 Word 中打开时，换行符位置正确
+
+```bash
+# 验证输出文档
+python3 -c "
+from docx import Document
+doc = Document('output.docx')
+table = doc.tables[0]
+for i, row in enumerate(table.rows):
+    text = row.cells[2].text
+    if '\n' in text:
+        print(f'行 {i}: 包含换行符')
+        print(repr(text))
+"
+```
+
+---
+
 ## 调试技巧
 
 ### 1. 总是使用 --verbose
