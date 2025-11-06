@@ -127,7 +127,9 @@ python3 ../scripts/run_complete_workflow.py \
 
 **推荐**：
 ```bash
---author "Gemini" 或 --author "Claude"
+--author "Claire.lee@amway.com"  # 默认值，可省略
+--author "translator@company.com"  # 使用电子邮件地址
+--author "Gemini" 或 --author "Claude"  # 使用翻译引擎名称
 ```
 
 **不推荐**：
@@ -136,7 +138,8 @@ python3 ../scripts/run_complete_workflow.py \
 ```
 
 **原因**：
-- 在 Word 中查看修订时，能清楚知道是哪个翻译引擎的结果
+- 在 Word 中查看修订时，能清楚知道修订者身份
+- 使用电子邮件地址提供联络方式，更专业
 - 便于对比不同翻译引擎的效果
 
 ---

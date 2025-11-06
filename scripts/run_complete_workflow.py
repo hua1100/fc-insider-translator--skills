@@ -168,8 +168,8 @@ def main():
     )
     parser.add_argument(
         '--author',
-        default='Claire',
-        help='追踪修订作者名称（默认：Claire）'
+        default='Claire.lee@amway.com',
+        help='追踪修订作者名称（默认：Claire.lee@amway.com）'
     )
     parser.add_argument(
         '--match-by',

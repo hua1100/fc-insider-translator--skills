@@ -275,12 +275,11 @@ python3 ../scripts/generate_translation_mapping.py \
   --match-by segment_id \
   --verbose
 
-# 步骤 4: 应用翻译
+# 步骤 4: 应用翻译（使用默认作者 Claire.lee@amway.com）
 python3 ../scripts/update_fc_insider_tracked.py \
   --input input.docx \
   --translations translations.json \
   --output output.docx \
-  --author "Gemini" \
   --mode read_inserted
 ```
 
@@ -315,12 +314,11 @@ python3 ../scripts/generate_translation_mapping.py \
   --match-by index \
   --verbose
 
-# 步骤 5: 应用翻译
+# 步骤 5: 应用翻译（使用默认作者 Claire.lee@amway.com）
 python3 ../scripts/update_fc_insider_tracked.py \
   --input input.docx \
   --translations translations.json \
   --output output.docx \
-  --author "Gemini" \
   --mode read_inserted
 ```
 

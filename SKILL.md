@@ -40,7 +40,7 @@ python3 scripts/run_complete_workflow.py \
   --output "output.docx"
 ```
 
-**提示**：默认作者为 "Claire"，可以省略 `--author` 参数。如需修改作者，添加 `--author "Your Name"`
+**提示**：默认作者为 "Claire.lee@amway.com"，可以省略 `--author` 参数。如需修改作者，添加 `--author "Your Name"`
 
 **就这么简单！** 脚本会自动完成表格提取、智能匹配、应用追踪修订。
 
@@ -60,7 +60,7 @@ python3 scripts/generate_translation_mapping.py \
   --match-by smart \
   --verbose
 
-# 步骤 3: 应用翻译（默认作者：Claire）
+# 步骤 3: 应用翻译（默认作者：Claire.lee@amway.com）
 python3 scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \

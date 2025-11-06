@@ -96,27 +96,25 @@ pip install -r requirements.txt
 ### 使用示例
 
 ```bash
-# 基本用法
+# 基本用法（使用默认作者 Claire.lee@amway.com）
 python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
-  --output "output.docx" \
-  --author "Gemini"
+  --output "output.docx"
 
 # 详细模式
 python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
-  --author "Gemini" \
   --verbose
 
-# 自定义匹配方式
+# 自定义匹配方式和作者
 python3 ../scripts/run_complete_workflow.py \
   --input "input.docx" \
   --new-translations "new_translations.txt" \
   --output "output.docx" \
-  --author "Gemini" \
+  --author "translator@company.com" \
   --match-by index \
   --update-mode read_inserted
 ```
@@ -300,21 +298,20 @@ python3 ../scripts/generate_translation_mapping.py \
 ### 使用示例
 
 ```bash
-# 自动模式（推荐）
+# 自动模式（推荐，使用默认作者）
 python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
-  --author "Gemini" \
   --mode auto \
   --verbose
 
-# 指定模式
+# 指定模式和自定义作者
 python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
   --output "output.docx" \
-  --author "Gemini" \
+  --author "translator@company.com" \
   --mode read_inserted
 ```
 

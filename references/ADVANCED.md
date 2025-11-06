@@ -348,12 +348,12 @@ def clear_and_apply_tracked_change(cell, old_text, new_text, author):
 ```xml
 <!-- 应用后的 XML 结构 -->
 <w:p>
-  <w:del w:author="Gemini" w:date="2025-01-06T10:30:00">
+  <w:del w:author="Claire.lee@amway.com" w:date="2025-01-06T10:30:00">
     <w:r>
       <w:delText>PY26 已至，作為全球政策諮詢委員...</w:delText>
     </w:r>
   </w:del>
-  <w:ins w:author="Gemini" w:date="2025-01-06T10:30:00">
+  <w:ins w:author="Claire.lee@amway.com" w:date="2025-01-06T10:30:00">
     <w:r>
       <w:t>PY26 正式啟動！作為創辦人理事會...</w:t>
     </w:r>

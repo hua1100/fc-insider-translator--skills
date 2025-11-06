@@ -209,10 +209,11 @@ python3 ../scripts/update_fc_insider_tracked.py \
   --input "/Users/hua/md腳本/FCInsider_Dec2025_Issue9_翻譯修訂版.docx" \
   --translations translations.json \
   --output "/Users/hua/md腳本/output_final.docx" \
-  --author "Gemini" \
   --mode read_inserted \
   --verbose
 ```
+
+**提示**：默认作者为 `Claire.lee@amway.com`，已省略 `--author` 参数。
 
 ---
 

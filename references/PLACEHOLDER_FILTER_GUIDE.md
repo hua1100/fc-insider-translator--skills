@@ -156,10 +156,11 @@ python3 ../scripts/update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations translations.json \
   --output "output.docx" \
-  --author "Gemini" \
   --mode read_inserted \
   --verbose
 ```
+
+**提示**：默认作者为 `Claire.lee@amway.com`，可以省略 `--author` 参数。
 
 ---
 
