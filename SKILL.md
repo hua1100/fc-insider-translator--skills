@@ -1,6 +1,6 @@
 ---
 name: fc-insider-translator
-description: 智能翻译更新工具 - 使用追踪修订批量更新 Word 文档翻译。支持智能匹配、自动占位符过滤、追踪修订处理。提供一键执行和分步执行两种模式。
+description: 处理 FC Insider 四列表格 Word 文档的翻译更新。使用追踪修订标记变更，智能匹配新旧翻译（顺序无关），自动过滤占位符行。当用户需要更新 Word 文档翻译、处理 DOCX 表格翻译、提到"tracked changes"、"追踪修订"、"translation mapping"、"翻译对照"时使用。
 version: 2.0
 ---
 
@@ -8,12 +8,10 @@ version: 2.0
 
 ## 🎯 核心功能
 
-本 Skill 专门处理 FC Insider 格式的 Word 文档翻译更新：
-- ✅ **智能匹配** - 顺序无关的自动配对
-- ✅ **追踪修订** - 自动处理已有追踪修订的文档
-- ✅ **占位符过滤** - 自动跳过占位符行
-- ✅ **一键执行** - 完整自动化工作流程
-- ✅ **灵活配置** - 支持分步执行和自定义参数
+- **智能匹配** - 使用文本相似度自动配对，顺序无关
+- **追踪修订** - 自动检测和处理已有追踪修订的文档
+- **占位符过滤** - 自动跳过 `"<0/>"在第 <1/> 頁` 等占位符行
+- **一键执行** - 完整自动化工作流程，从 Word 到 Word
 
 ---
 
@@ -29,13 +27,9 @@ python3 run_complete_workflow.py \
   --author "Your Name"
 ```
 
-**就这么简单！** 脚本会自动：
-1. 提取表格
-2. 智能匹配翻译
-3. 应用追踪修订
-4. 生成输出文档
+**就这么简单！** 脚本会自动完成表格提取、智能匹配、应用追踪修订。
 
-### 方式 2: 分步执行（高级用户）
+### 方式 2: 分步执行
 
 ```bash
 # 步骤 1: 提取表格
@@ -51,7 +45,7 @@ python3 generate_translation_mapping.py \
   --match-by smart \
   --verbose
 
-# 步骤 3: 应用翻译（自动检测模式）
+# 步骤 3: 应用翻译
 python3 update_fc_insider_tracked.py \
   --input "input.docx" \
   --translations "translations.json" \
@@ -63,222 +57,57 @@ python3 update_fc_insider_tracked.py \
 
 ---
 
-## 📋 完整工作流程
+## 📋 工作流程
 
 ```
 输入
-├─ input.docx (Word 文档)
-└─ new_translations.txt (新翻译，纯文本，每行一个)
-
+├─ input.docx (Word 文档，四列表格)
+└─ new_translations.txt (新翻译，每行一个，顺序可不一致)
     ↓
-
 [步骤 1] extract_table_markitdown_simple.py
-    - 使用 MarkItDown 提取表格
-    - 生成 AI 友好的 Markdown 格式
+    使用 MarkItDown 提取表格为 Markdown
     ↓
 extracted_table.md
-
     ↓
-
 [步骤 2] generate_translation_mapping.py
-    - 自动过滤占位符行（如 "<0/>"在第 <1/> 頁）
-    - 智能匹配：使用文本相似度自动配对
-    - 支持顺序不一致的新翻译
+    • 自动过滤占位符行
+    • 智能匹配新旧翻译
+    • 计算文本相似度
     ↓
 translations.json (翻译映射表)
-
     ↓
-
-[可选] analyze_word_structure_deep.py
-    - 深度分析 Word 文档结构
-    - 诊断问题，提供解决方案建议
-    - 仅在遇到问题时使用
-    ↓
-分析报告 + 建议
-
-    ↓
-
 [步骤 3] update_fc_insider_tracked.py
-    - 自动检测文档类型
-    - 处理已有追踪修订
-    - 应用新的追踪修订
+    • 自动检测文档类型
+    • 处理已有追踪修订
+    • 应用新的追踪修订
     ↓
 output.docx (含追踪修订的输出文档)
 ```
 
 ---
 
-## 🛠️ 核心脚本说明
+## 🛠️ 核心脚本
 
-### 1. extract_table_markitdown_simple.py
+### extract_table_markitdown_simple.py
+从 Word 文档提取表格，转换为 AI 友好的 Markdown 格式。使用 Microsoft MarkItDown，专为 LLM 优化。
 
-**功能**：从 Word 文档提取表格，转换为 Markdown 格式
+### generate_translation_mapping.py
+生成新旧翻译映射表。支持智能匹配（顺序无关）、segment_id 匹配、index 匹配三种模式。自动过滤占位符行。
 
-**优势**：
-- 使用 Microsoft MarkItDown（专为 LLM 优化）
-- 准确识别表格结构
-- 生成 AI 友好的格式
+### update_fc_insider_tracked.py
+将翻译应用到 Word 文档，使用追踪修订标记变更。自动检测文档类型，支持三种读取模式（auto/read_deleted/read_inserted）。
 
-**用法**：
-```bash
-python3 extract_table_markitdown_simple.py \
-  --input "input.docx" \
-  --output "table.md"
-```
+### run_complete_workflow.py
+一键执行完整工作流程。自动调用上述三个脚本，管理临时文件，提供依赖检查。
 
-**输出**：
-```markdown
-| Segment ID | Status | Source | Target |
-|------------|--------|--------|--------|
-| 123abc... | Translated | Hello | 你好 |
-```
-
----
-
-### 2. generate_translation_mapping.py
-
-**功能**：生成新旧翻译映射表
-
-**核心特性**：
-- ✅ **自动占位符过滤** - 跳过 `"<0/>"在第 <1/> 頁` 等占位符行
-- ✅ **智能匹配** - 使用文本相似度自动配对（顺序无关）
-- ✅ **多种匹配模式**：
-  - `smart` - 智能匹配（推荐）
-  - `segment_id` - 通过 ID 匹配
-  - `index` - 按索引匹配
-
-**用法**：
-
-```bash
-# 智能匹配（推荐）- 顺序无关
-python3 generate_translation_mapping.py \
-  --markdown "table.md" \
-  --new-translations "new_trans.txt" \
-  --output "translations.json" \
-  --match-by smart \
-  --verbose
-
-# segment_id 匹配（需要 JSON 格式）
-python3 generate_translation_mapping.py \
-  --markdown "table.md" \
-  --new-translations "new_trans.json" \
-  --output "translations.json" \
-  --match-by segment_id
-
-# index 匹配（顺序必须一致）
-python3 generate_translation_mapping.py \
-  --markdown "table.md" \
-  --new-translations "new_trans.txt" \
-  --output "translations.json" \
-  --match-by index
-```
-
-**新翻译格式**：
-
-**纯文本（推荐）**：
-```txt
-第一个翻译
-第二个翻译
-第三个翻译
-```
-
-**JSON 格式**：
-```json
-{
-  "segment_id_1": "翻译1",
-  "segment_id_2": "翻译2"
-}
-```
-
-**输出**：
-```json
-{
-  "translations": [
-    {
-      "segment_id": "123abc...",
-      "old_text": "旧翻译",
-      "new_text": "新翻译"
-    }
-  ]
-}
-```
-
----
-
-### 3. update_fc_insider_tracked.py
-
-**功能**：将翻译应用到 Word 文档，使用追踪修订标记变更
-
-**核心特性**：
-- ✅ **自动检测** - 识别文档是否已有追踪修订
-- ✅ **三种读取模式**：
-  - `auto` - 自动检测（推荐）
-  - `read_deleted` - 从删除的文本读取
-  - `read_inserted` - 从插入的文本读取
-- ✅ **清除并重新应用** - 处理已有追踪修订的单元格
-
-**用法**：
-
-```bash
-# 自动模式（推荐）
-python3 update_fc_insider_tracked.py \
-  --input "input.docx" \
-  --translations "translations.json" \
-  --output "output.docx" \
-  --author "Your Name" \
-  --mode auto \
-  --verbose
-
-# 指定模式
-python3 update_fc_insider_tracked.py \
-  --input "input.docx" \
-  --translations "translations.json" \
-  --output "output.docx" \
-  --author "Your Name" \
-  --mode read_inserted
-```
-
----
-
-### 4. analyze_word_structure_deep.py（诊断工具）
-
-**功能**：深度分析 Word 文档结构，诊断问题
-
-**使用场景**：
-- 更新脚本失败时
-- 需要了解文档结构时
-- 需要选择合适的更新策略时
-
-**用法**：
-
-```bash
-# 分析指定行
-python3 analyze_word_structure_deep.py \
-  --input "input.docx" \
-  --sample-segment "segment-id-here" \
-  --verbose
-
-# 导出 XML 和 JSON
-python3 analyze_word_structure_deep.py \
-  --input "input.docx" \
-  --sample-segment "segment-id-here" \
-  --export-xml \
-  --export-json "analysis.json"
-```
-
-**输出**：
-- 单元格结构分析
-- Run 属性详情
-- 自动生成解决方案建议
-- 可选：导出 XML 和 JSON
+### analyze_word_structure_deep.py
+深度诊断工具。分析 Word 文档结构，识别问题，提供解决方案建议。仅在遇到问题时使用。
 
 ---
 
 ## 📝 输入文件格式
 
-### 新翻译文件
-
-**推荐格式：纯文本**
+### 新翻译文件（纯文本，推荐）
 
 ```txt
 PY26 正式啟動！作為創辦人理事會領袖...
@@ -287,287 +116,58 @@ PY26 正式啟動！作為創辦人理事會領袖...
 ```
 
 **要求**：
-- ✅ 每行一个翻译
-- ✅ 不包含占位符行（如 `"<0/>"在第 <1/> 頁`）
-- ✅ 顺序可以不一致（使用 `--match-by smart`）
-- ⚠️ 行数需要与过滤后的表格行数一致
-
-**可选格式：JSON**
-
-```json
-{
-  "1360baf04e-73fb-432d-abf1-a0887de5f16a": "新翻译1",
-  "1460baf04e-73fb-432d-abf1-a0887de5f16a": "新翻译2"
-}
-```
-
----
-
-## 🔧 高级功能
-
-### 智能匹配
-
-使用文本相似度自动配对，即使顺序不一致也能正确匹配！
-
-**工作原理**：
-1. 计算所有可能配对的相似度
-2. 使用贪婪算法选择最佳配对
-3. 警告低相似度的配对（< 15%）
-
-**示例输出**：
-```
-🔍 智能匹配模式
-✓ 智能匹配完成：15 个配对
-
-匹配示例（按相似度排序）:
-  1. 相似度: 87.34%
-     旧: PY26 已至，作為全球政策諮詢委員...
-     新: PY26 正式啟動！作為創辦人理事會...
-
-⚠️ 警告：2 个配对的相似度较低（< 15%）
-   建议检查这些配对是否正确
-```
-
-### 占位符自动过滤
-
-自动识别并跳过占位符行：
-- `"<0/>"在第 <1/> 頁`
-- `"<2/>"`
-- `第 <12/> 頁`
-- `內文`
-
-**示例输出**：
-```
-占位符过滤:
-  总行数: 26
-  保留: 13
-  跳过: 13
-
-跳过的占位符行（前10个）:
-    1. 10ad6613a-...: "<0/>"在第 <1/> 頁
-    2. 24efa4ea5-...: "<2/>"
-```
-
-### 追踪修订自动处理
-
-自动检测和处理已有追踪修订的单元格：
-
-```
-[1/12] 处理 segment-id...
-    自动检测到文本来源: deleted
-    ✓ 成功
-```
+- 每行一个翻译
+- 不包含占位符行
+- 顺序可以不一致（使用 `--match-by smart`）
+- 行数需要与过滤后的表格行数一致
 
 ---
 
 ## 📚 完整文档
 
-### 核心指南
+### 详细指南
+- **[PARAMETERS.md](PARAMETERS.md)** - 完整参数说明
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - 故障排查指南
+- **[BEST_PRACTICES.md](BEST_PRACTICES.md)** - 使用最佳实践
+- **[ADVANCED.md](ADVANCED.md)** - 高级功能详解
+- **[MIGRATION_GUIDE.md](MIGRATION_GUIDE.md)** - 从旧版本迁移
+
+### 核心技术
 - **[SMART_MATCHING_GUIDE.md](SMART_MATCHING_GUIDE.md)** - 智能匹配详解
 - **[TRACKED_CHANGES_SOLUTION.md](TRACKED_CHANGES_SOLUTION.md)** - 追踪修订处理
 - **[PLACEHOLDER_FILTER_GUIDE.md](PLACEHOLDER_FILTER_GUIDE.md)** - 占位符过滤
-
-### 工作流程
-- **[AUTO_CONVERT_GUIDE.md](AUTO_CONVERT_GUIDE.md)** - 自动转换功能
 - **[MAPPING_MECHANISM_EXPLAINED.md](MAPPING_MECHANISM_EXPLAINED.md)** - 映射机制详解
 
-### 诊断工具
-- **[THREE_SOLUTIONS_GUIDE.md](THREE_SOLUTIONS_GUIDE.md)** - 三种解决方案对比
-- **[TAG_ISSUE_SOLUTION.md](TAG_ISSUE_SOLUTION.md)** - Tag 样式问题
-
-### 旧版参考（已过时）
-- **[CLAUDE_SKILLS_GUIDE.md](CLAUDE_SKILLS_GUIDE.md)** - 旧版简化方案
-- **[WORKFLOW.md](WORKFLOW.md)** - 旧版混合方案
-- **[README.md](README.md)** - 项目概览
-
 ---
 
-## ⚙️ 参数说明
+## 💡 快速提示
 
-### 通用参数
+### 遇到映射不正确？
+使用 `--match-by smart --verbose` 查看匹配详情和相似度分数。
 
-| 参数 | 说明 | 必需 | 默认值 |
-|------|------|------|--------|
-| `--input` | 输入 Word 文档路径 | ✅ | - |
-| `--output` | 输出文档路径 | ✅ | - |
-| `--verbose` | 显示详细信息 | ❌ | False |
-
-### generate_translation_mapping.py
-
-| 参数 | 说明 | 可选值 | 推荐 |
-|------|------|--------|------|
-| `--match-by` | 匹配方式 | `smart`, `segment_id`, `index` | `smart` |
-| `--skip-placeholder-filter` | 跳过占位符过滤 | - | 不建议 |
-
-### update_fc_insider_tracked.py
-
-| 参数 | 说明 | 可选值 | 推荐 |
-|------|------|--------|------|
-| `--mode` | 读取模式 | `auto`, `read_deleted`, `read_inserted` | `auto` |
-| `--author` | 追踪修订作者 | 任意文本 | 你的名字 |
-
----
-
-## 🔍 故障排查
-
-### 问题 1: 映射不正确
-
-**症状**：生成的映射表中，新旧翻译配对错误
-
-**解决方案**：
-1. 使用 `--match-by smart` 智能匹配
-2. 添加 `--verbose` 查看匹配详情
-3. 检查低相似度配对
-
-### 问题 2: 更新失败 - 文本不匹配
-
-**症状**：
-```
-✗ 文本不匹配
-预期: '旧翻译'
-实际: '...' (空)
-```
-
-**解决方案**：
-1. 运行诊断工具：
-   ```bash
-   python3 analyze_word_structure_deep.py \
-     --input "input.docx" \
-     --sample-segment "segment-id" \
-     --verbose
-   ```
-2. 根据诊断建议选择合适的 `--mode`
-3. 如果文档已有追踪修订，使用 `update_fc_insider_tracked.py`
-
-### 问题 3: 行数不匹配
-
-**症状**：
-```
-⚠️ 警告：
-新翻译行数: 15
-过滤后表格行数: 13
-```
-
-**解决方案**：
-1. 检查新翻译文件，确保没有包含占位符行
-2. 使用 `--verbose` 查看哪些行被过滤了
-3. 调整新翻译文件，使行数匹配
-
----
-
-## 💡 最佳实践
-
-### 1. 使用智能匹配
-
-✅ **推荐**：
+### 遇到更新失败？
+运行诊断工具：
 ```bash
---match-by smart --verbose
+python3 analyze_word_structure_deep.py \
+  --input "input.docx" \
+  --sample-segment "segment-id" \
+  --verbose
 ```
 
-❌ **不推荐**：
-```bash
---match-by index  # 顺序依赖，容易出错
-```
-
-### 2. 始终使用 --verbose
-
-可以看到：
-- 匹配过程
-- 相似度分数
-- 潜在问题
-
-### 3. 检查变更预览
-
-生成映射表后，检查预览：
-```
-[1] segment-id-1
-  旧: 原始翻译...
-  新: 新翻译...  ← 检查是否正确
-```
-
-### 4. 分步执行（首次使用）
-
-第一次使用时，建议分步执行：
-1. 先生成映射表，检查是否正确
-2. 再应用到文档
-
-熟悉后可以使用一键执行。
+### 行数不匹配？
+检查新翻译文件是否包含占位符行。使用 `--verbose` 查看哪些行被过滤。
 
 ---
 
-## ⚠️ 注意事项
+## 📊 版本信息
 
-### 文件格式
+**当前版本**：v2.0
 
-- ✅ **支持**：`.docx` 格式
-- ❌ **不支持**：`.doc`（旧格式）
+**主要特性**：
+- 智能匹配功能
+- 追踪修订自动处理
+- 占位符自动过滤
+- 一键执行脚本
+- 深度诊断工具
 
-### 表格结构
-
-假设文档结构为：
-- 四列表格
-- 第1列：Segment ID
-- 第4列：Target（翻译列）
-
-### 追踪修订
-
-- 自动启用文档层级的追踪修订
-- 保留原有追踪修订历史
-- 添加新的追踪修订标记
-
----
-
-## 🚀 从旧版本迁移
-
-### 如果你之前使用：
-
-**旧方案 1: run_workflow_markitdown.sh**
-→ 现在使用：`run_complete_workflow.py` (一键执行)
-
-**旧方案 2: run_workflow_simple.sh**
-→ 现在使用：`run_complete_workflow.py` (一键执行)
-
-**旧方案 3: 手动三步流程**
-→ 现在使用：智能匹配 + 追踪修订处理
-
-### 主要改进：
-
-1. ✅ **智能匹配** - 顺序无关
-2. ✅ **自动占位符过滤** - 不会错误匹配
-3. ✅ **追踪修订处理** - 自动处理已有修订
-4. ✅ **一键执行** - 更简单
-5. ✅ **详细诊断** - 问题排查更容易
-
----
-
-## 🤝 获取帮助
-
-### 遇到问题？
-
-1. 查看相关文档（见上方"完整文档"）
-2. 使用 `--verbose` 查看详细输出
-3. 使用诊断工具分析问题
-4. 查看故障排查部分
-
-### 反馈建议
-
-如果发现问题或有改进建议，请提供：
-- 完整的命令
-- 错误信息
-- 相关文件（如需要）
-
----
-
-## 📊 版本历史
-
-### v2.0 (当前版本)
-- ✅ 智能匹配功能
-- ✅ 追踪修订自动处理
-- ✅ 占位符自动过滤
-- ✅ 一键执行脚本
-- ✅ 深度诊断工具
-
-### v1.0 (已过时)
-- 基础的表格提取
-- 简单的映射生成
-- 手动三步流程
+查看 [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) 了解从 v1.0 迁移指南。
