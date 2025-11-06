@@ -370,6 +370,39 @@ def main():
     new_translations = load_new_translations(args.new_translations, args.format)
     print(f"✓ 加载 {len(new_translations)} 个译文")
 
+    # 自动转换：如果是 text 格式 + segment_id 匹配，自动转换成 JSON 格式
+    if args.match_by == 'segment_id' and isinstance(list(new_translations.keys())[0] if new_translations else '', str) and list(new_translations.keys())[0].isdigit() if new_translations else False:
+        print(f"\n🔄 检测到纯文本格式 + segment_id 匹配模式")
+        print(f"   自动将文本转换为 JSON 格式（文本行 → segment_id）...")
+
+        # 将索引映射转换为 segment_id 映射
+        text_list = [new_translations[str(i)] for i in range(len(new_translations))]
+
+        if len(text_list) != len(old_table):
+            print(f"\n⚠️  警告：")
+            print(f"   新翻译行数: {len(text_list)}")
+            print(f"   过滤后表格行数: {len(old_table)}")
+            if len(text_list) < len(old_table):
+                print(f"   ✗ 新翻译行数不足！请检查新翻译文件")
+                return 1
+            elif len(text_list) > len(old_table):
+                print(f"   ⚠ 新翻译行数过多，将只使用前 {len(old_table)} 行")
+                text_list = text_list[:len(old_table)]
+
+        # 转换为 segment_id -> text 映射
+        converted_translations = {}
+        for idx, row in enumerate(old_table):
+            if idx < len(text_list):
+                converted_translations[row['segment_id']] = text_list[idx]
+
+        new_translations = converted_translations
+        print(f"✓ 转换完成：{len(new_translations)} 个译文已映射到 segment_id")
+
+        if args.verbose:
+            print(f"\n转换示例（前3个）:")
+            for i, (seg_id, text) in enumerate(list(new_translations.items())[:3], 1):
+                print(f"  {i}. {seg_id}: {text[:50]}{'...' if len(text) > 50 else ''}")
+
     # 生成对照表
     print(f"\n生成对照表（匹配方式: {args.match_by}）...")
     mappings = generate_translation_mapping(
