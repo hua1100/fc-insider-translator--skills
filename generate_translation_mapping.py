@@ -14,8 +14,10 @@
 
 import json
 import argparse
+import re
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
+from difflib import SequenceMatcher
 
 
 def load_markdown_table(md_path: str) -> List[Dict[str, str]]:
@@ -56,6 +58,220 @@ def load_markdown_table(md_path: str) -> List[Dict[str, str]]:
                     })
 
     return rows
+
+
+def is_placeholder_row(text: str) -> bool:
+    """
+    判断是否为占位符行
+
+    占位符行的特征：
+    - 主要由 <数字/> 标记组成
+    - 可能包含少量固定文本（如"在第"、"頁"）
+    - 例如: "<0/>"在第 <1/> 頁, "<2/>", 第 <12/> 頁
+
+    Returns:
+        True if the text is primarily placeholders
+    """
+    # 移除所有占位符
+    without_placeholders = re.sub(r'[<"]?\d+/?[>"]?', '', text)
+    # 移除引号
+    without_placeholders = re.sub(r'["""\'\'<>]', '', without_placeholders)
+    # 移除常见的连接词
+    without_placeholders = re.sub(r'(在第|頁|on page|page)', '', without_placeholders, flags=re.IGNORECASE)
+    # 移除空白
+    without_placeholders = without_placeholders.strip()
+
+    # 如果移除占位符后剩余内容很少，认为是占位符行
+    if len(without_placeholders) <= 3:
+        return True
+
+    # 检查是否包含大量占位符标记
+    placeholder_count = len(re.findall(r'<\d+/>', text))
+    if placeholder_count >= 2:
+        # 如果有2个或更多占位符，且总长度很短
+        if len(text) <= 30:
+            return True
+
+    return False
+
+
+def calculate_text_similarity(text1: str, text2: str) -> float:
+    """
+    计算两段文本的相似度
+
+    使用多种方法综合评分：
+    1. SequenceMatcher - 序列相似度
+    2. 共同字符比例
+    3. 词汇重叠度
+
+    Returns:
+        0.0-1.0 的相似度分数
+    """
+    if not text1 or not text2:
+        return 0.0
+
+    # 方法 1: SequenceMatcher
+    seq_ratio = SequenceMatcher(None, text1, text2).ratio()
+
+    # 方法 2: 共同字符比例
+    set1 = set(text1)
+    set2 = set(text2)
+    if not set1 or not set2:
+        char_ratio = 0.0
+    else:
+        common_chars = set1 & set2
+        char_ratio = len(common_chars) / max(len(set1), len(set2))
+
+    # 方法 3: 词汇重叠（按标点和空格分词）
+    words1 = set(re.findall(r'[\w]+', text1))
+    words2 = set(re.findall(r'[\w]+', text2))
+    if not words1 or not words2:
+        word_ratio = 0.0
+    else:
+        common_words = words1 & words2
+        word_ratio = len(common_words) / max(len(words1), len(words2))
+
+    # 综合评分（序列相似度权重最高）
+    similarity = (seq_ratio * 0.5) + (char_ratio * 0.2) + (word_ratio * 0.3)
+
+    return similarity
+
+
+def smart_match_translations(
+    old_table: List[Dict[str, str]],
+    new_texts: List[str],
+    min_similarity: float = 0.15,
+    verbose: bool = False
+) -> Dict[str, str]:
+    """
+    智能匹配：使用文本相似度自动配对新旧翻译
+
+    Args:
+        old_table: 旧翻译表格
+        new_texts: 新翻译列表
+        min_similarity: 最小相似度阈值（低于此值会警告）
+        verbose: 是否显示详细信息
+
+    Returns:
+        segment_id -> new_text 映射
+    """
+    if verbose:
+        print(f"\n🔍 智能匹配模式")
+        print(f"   旧翻译数量: {len(old_table)}")
+        print(f"   新翻译数量: {len(new_texts)}")
+        print(f"   最小相似度阈值: {min_similarity}")
+
+    # 计算所有可能的配对相似度
+    similarity_matrix = []
+    for old_idx, old_row in enumerate(old_table):
+        old_text = old_row['target']
+        row_similarities = []
+
+        for new_idx, new_text in enumerate(new_texts):
+            similarity = calculate_text_similarity(old_text, new_text)
+            row_similarities.append({
+                'old_idx': old_idx,
+                'new_idx': new_idx,
+                'similarity': similarity,
+                'old_text': old_text,
+                'new_text': new_text,
+                'segment_id': old_row['segment_id']
+            })
+
+        similarity_matrix.append(row_similarities)
+
+    # 贪婪匹配：为每个旧翻译找到最佳新翻译
+    used_new_indices = set()
+    matches = []
+
+    # 按相似度排序所有可能的配对
+    all_pairs = []
+    for row_similarities in similarity_matrix:
+        all_pairs.extend(row_similarities)
+    all_pairs.sort(key=lambda x: x['similarity'], reverse=True)
+
+    # 贪婪选择最佳配对
+    used_old = set()
+    for pair in all_pairs:
+        if pair['old_idx'] not in used_old and pair['new_idx'] not in used_new_indices:
+            matches.append(pair)
+            used_old.add(pair['old_idx'])
+            used_new_indices.add(pair['new_idx'])
+
+            if len(matches) == len(old_table):
+                break
+
+    # 生成映射
+    result = {}
+    low_similarity_warnings = []
+
+    for match in matches:
+        result[match['segment_id']] = match['new_text']
+
+        if match['similarity'] < min_similarity:
+            low_similarity_warnings.append(match)
+
+    if verbose:
+        print(f"✓ 智能匹配完成：{len(result)} 个配对")
+
+        # 显示匹配示例
+        print(f"\n匹配示例（按相似度排序，前5个）:")
+        sorted_matches = sorted(matches, key=lambda x: x['similarity'], reverse=True)
+        for i, match in enumerate(sorted_matches[:5], 1):
+            print(f"\n  {i}. 相似度: {match['similarity']:.2%}")
+            print(f"     旧: {match['old_text'][:60]}{'...' if len(match['old_text']) > 60 else ''}")
+            print(f"     新: {match['new_text'][:60]}{'...' if len(match['new_text']) > 60 else ''}")
+
+    # 警告：相似度过低的配对
+    if low_similarity_warnings:
+        print(f"\n⚠️  警告：{len(low_similarity_warnings)} 个配对的相似度较低（< {min_similarity:.0%}）")
+        print(f"   建议检查这些配对是否正确：")
+
+        for i, match in enumerate(low_similarity_warnings[:5], 1):
+            print(f"\n   {i}. 相似度: {match['similarity']:.2%}")
+            print(f"      旧: {match['old_text'][:50]}{'...' if len(match['old_text']) > 50 else ''}")
+            print(f"      新: {match['new_text'][:50]}{'...' if len(match['new_text']) > 50 else ''}")
+
+        if len(low_similarity_warnings) > 5:
+            print(f"   ... 还有 {len(low_similarity_warnings) - 5} 个低相似度配对")
+
+    return result
+
+
+def filter_placeholder_rows(rows: List[Dict[str, str]], verbose: bool = False) -> List[Dict[str, str]]:
+    """
+    过滤掉占位符行
+
+    Args:
+        rows: 表格行列表
+        verbose: 是否显示详细信息
+
+    Returns:
+        过滤后的行列表
+    """
+    filtered = []
+    skipped = []
+
+    for row in rows:
+        target_text = row['target']
+
+        if is_placeholder_row(target_text):
+            skipped.append(row)
+        else:
+            filtered.append(row)
+
+    if verbose:
+        print(f"\n占位符过滤:")
+        print(f"  总行数: {len(rows)}")
+        print(f"  保留: {len(filtered)}")
+        print(f"  跳过: {len(skipped)}")
+
+        if skipped:
+            print(f"\n跳过的占位符行（前10个）:")
+            for i, row in enumerate(skipped[:10], 1):
+                print(f"    {i}. {row['segment_id']}: {row['target'][:50]}")
+
+    return filtered
 
 
 def load_new_translations(input_path: str, format: str = 'auto') -> Dict[str, str]:
@@ -124,7 +340,8 @@ def generate_translation_mapping(
         old_text = row['target']
 
         # 匹配新译文
-        if match_by == 'segment_id':
+        if match_by == 'segment_id' or match_by == 'smart':
+            # smart 模式在之前已经转换为 segment_id 映射
             new_text = new_translations.get(segment_id)
         elif match_by == 'index':
             new_text = new_translations.get(str(idx))
@@ -252,9 +469,9 @@ def main():
     )
     parser.add_argument(
         '--match-by',
-        choices=['segment_id', 'index'],
+        choices=['segment_id', 'index', 'smart'],
         default='segment_id',
-        help='匹配方式（默认：segment_id）'
+        help='匹配方式：segment_id(默认), index(按索引), smart(智能匹配)'
     )
     parser.add_argument(
         '--format',
@@ -266,6 +483,16 @@ def main():
         '--preview-only',
         action='store_true',
         help='只预览变更，不保存文件'
+    )
+    parser.add_argument(
+        '--skip-placeholder-filter',
+        action='store_true',
+        help='跳过占位符过滤（默认会过滤）'
+    )
+    parser.add_argument(
+        '--verbose',
+        action='store_true',
+        help='显示详细信息'
     )
 
     args = parser.parse_args()
@@ -279,9 +506,60 @@ def main():
     old_table = load_markdown_table(args.markdown)
     print(f"✓ 加载 {len(old_table)} 行")
 
+    # 过滤占位符行
+    if not args.skip_placeholder_filter:
+        old_table = filter_placeholder_rows(old_table, args.verbose)
+        print(f"✓ 过滤后保留 {len(old_table)} 行（跳过了占位符行）")
+
     print(f"\n读取新译文: {args.new_translations}")
     new_translations = load_new_translations(args.new_translations, args.format)
     print(f"✓ 加载 {len(new_translations)} 个译文")
+
+    # 智能匹配：使用文本相似度自动配对
+    if args.match_by == 'smart':
+        # 将新翻译转换为列表
+        if isinstance(list(new_translations.keys())[0] if new_translations else '', str) and list(new_translations.keys())[0].isdigit() if new_translations else False:
+            # 如果是索引格式，转换为列表
+            text_list = [new_translations[str(i)] for i in range(len(new_translations))]
+        else:
+            # 如果是 segment_id 格式，只提取文本
+            text_list = list(new_translations.values())
+
+        # 使用智能匹配
+        new_translations = smart_match_translations(old_table, text_list, verbose=args.verbose)
+
+    # 自动转换：如果是 text 格式 + segment_id 匹配，自动转换成 JSON 格式
+    elif args.match_by == 'segment_id' and isinstance(list(new_translations.keys())[0] if new_translations else '', str) and list(new_translations.keys())[0].isdigit() if new_translations else False:
+        print(f"\n🔄 检测到纯文本格式 + segment_id 匹配模式")
+        print(f"   自动将文本转换为 JSON 格式（文本行 → segment_id）...")
+
+        # 将索引映射转换为 segment_id 映射
+        text_list = [new_translations[str(i)] for i in range(len(new_translations))]
+
+        if len(text_list) != len(old_table):
+            print(f"\n⚠️  警告：")
+            print(f"   新翻译行数: {len(text_list)}")
+            print(f"   过滤后表格行数: {len(old_table)}")
+            if len(text_list) < len(old_table):
+                print(f"   ✗ 新翻译行数不足！请检查新翻译文件")
+                return 1
+            elif len(text_list) > len(old_table):
+                print(f"   ⚠ 新翻译行数过多，将只使用前 {len(old_table)} 行")
+                text_list = text_list[:len(old_table)]
+
+        # 转换为 segment_id -> text 映射
+        converted_translations = {}
+        for idx, row in enumerate(old_table):
+            if idx < len(text_list):
+                converted_translations[row['segment_id']] = text_list[idx]
+
+        new_translations = converted_translations
+        print(f"✓ 转换完成：{len(new_translations)} 个译文已映射到 segment_id")
+
+        if args.verbose:
+            print(f"\n转换示例（前3个）:")
+            for i, (seg_id, text) in enumerate(list(new_translations.items())[:3], 1):
+                print(f"  {i}. {seg_id}: {text[:50]}{'...' if len(text) > 50 else ''}")
 
     # 生成对照表
     print(f"\n生成对照表（匹配方式: {args.match_by}）...")

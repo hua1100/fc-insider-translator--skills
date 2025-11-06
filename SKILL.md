@@ -1,324 +1,173 @@
 ---
-name: fc-insider-translator
-description: 使用追蹤修訂將翻譯批量更新到 FC Insider DOCX 文件的四欄表格結構中。適用於批量翻譯整理需求，且僅允許部分腳本執行以強化安全性。支持混合方案（Word→Markdown→對照表→XML追蹤修訂）解決AI解析表格錯誤問題。
-allowed-tools: "scripts/update_fc_insider_v3.py,scripts/tag_protector,scripts/extract_table_to_markdown.py,scripts/generate_translation_mapping.py,scripts/run_translation_workflow.sh"
+name: fc-document-tracking-changes
+description: 处理 Word 文档翻译更新，使用追踪修订标记变更。支持智能匹配新旧翻译（顺序无关）、自动过滤占位符行、处理已有追踪修订的文档。当用户需要更新 Word 文档翻译、处理 DOCX 表格翻译、提到"tracked changes"、"追踪修订"、"translation mapping"、"翻译对照"时使用。
+version: 2.0
 ---
-# fc-insider-translator
 
-## 🚀 Claude Skills 環境快速開始（推薦）
+# FC Document Tracking Changes Skill
 
-**適用於 Claude Skills 環境的簡化方案** → 詳見 [CLAUDE_SKILLS_GUIDE.md](CLAUDE_SKILLS_GUIDE.md)
+## 🎯 核心功能
 
-### 一鍵運行（僅需 python-docx）
-
-```bash
-bash run_workflow_simple.sh input.docx new_translations.json output.docx
-```
-
-**特點**：
-- ✅ 純 Python 實現，無需外部工具
-- ✅ 自動檢查並安裝依賴
-- ✅ 直接操作 DOCX 文件
-- ✅ 完整追蹤修訂支持
+- **智能匹配** - 使用文本相似度自动配对，顺序无关
+- **追踪修订** - 自动检测和处理已有追踪修订的文档
+- **占位符过滤** - 自动跳过 `"<0/>"在第 <1/> 頁` 等占位符行
+- **一键执行** - 完整自动化工作流程，从 Word 到 Word
 
 ---
 
-## ⚠️ 其他環境：混合方案（需要 Pandoc）
+## 🚀 快速开始
 
-如果你**不在 Claude Skills 環境**，或需要更高級的功能，可使用混合方案：
+### 方式 1: 一键执行（推荐）
 
-→ 詳見 [WORKFLOW.md](WORKFLOW.md)
-
-### 混合方案概述
-
-混合方案將 **讀取** 和 **寫入** 分離，解決 AI 直接解析 Word XML 的問題：
-
-1. **讀取階段**：Word → Markdown（AI 友好格式）
-   - 使用 `extract_table_to_markdown.py`（需要 Pandoc 或 docx2python）
-
-2. **分析階段**：基於 Markdown 生成對照表
-   - 使用 `generate_translation_mapping.py`
-
-3. **寫入階段**：保持原有 XML + 追蹤修訂
-   - 使用 `update_fc_insider_v3.py`（需要 unpack/pack）
-
-**快速開始**：
 ```bash
-# 需要先安裝 Pandoc
-bash run_translation_workflow.sh input.docx new_translations.json output.docx
+python3 run_complete_workflow.py \
+  --input "input.docx" \
+  --new-translations "new_translations.txt" \
+  --output "output.docx" \
+  --author "Your Name"
+```
+
+**就这么简单！** 脚本会自动完成表格提取、智能匹配、应用追踪修订。
+
+### 方式 2: 分步执行
+
+```bash
+# 步骤 1: 提取表格
+python3 extract_table_markitdown_simple.py \
+  --input "input.docx" \
+  --output "extracted_table.md"
+
+# 步骤 2: 生成翻译映射（智能匹配）
+python3 generate_translation_mapping.py \
+  --markdown "extracted_table.md" \
+  --new-translations "new_translations.txt" \
+  --output "translations.json" \
+  --match-by smart \
+  --verbose
+
+# 步骤 3: 应用翻译
+python3 update_fc_insider_tracked.py \
+  --input "input.docx" \
+  --translations "translations.json" \
+  --output "output.docx" \
+  --author "Your Name" \
+  --mode auto \
+  --verbose
 ```
 
 ---
 
-## 📚 文檔導航
+## 📋 工作流程
 
-- **[CLAUDE_SKILLS_GUIDE.md](CLAUDE_SKILLS_GUIDE.md)** - Claude Skills 環境專用（推薦）
-- **[WORKFLOW.md](WORKFLOW.md)** - 完整混合方案（需要 Pandoc）
-- **[README.md](README.md)** - 項目概覽和技術對比
-- **[quickstart.md](quickstart.md)** - 原始 XML 方案參考
-- **[xml_patterns.md](xml_patterns.md)** - XML 結構參考
+```
+输入
+├─ input.docx (Word 文档，四列表格)
+└─ new_translations.txt (新翻译，每行一个，顺序可不一致)
+    ↓
+[步骤 1] extract_table_markitdown_simple.py
+    使用 MarkItDown 提取表格为 Markdown
+    ↓
+extracted_table.md
+    ↓
+[步骤 2] generate_translation_mapping.py
+    • 自动过滤占位符行
+    • 智能匹配新旧翻译
+    • 计算文本相似度
+    ↓
+translations.json (翻译映射表)
+    ↓
+[步骤 3] update_fc_insider_tracked.py
+    • 自动检测文档类型
+    • 处理已有追踪修订
+    • 应用新的追踪修订
+    ↓
+output.docx (含追踪修订的输出文档)
+```
 
 ---
 
-## 使用規範與安全提醒
-- 禁止生成或修改任何 Python 腳本。
-- 僅允許調用 scripts/ 資料夾中的以下腳本：
-  - `update_fc_insider_v3.py`（XML 追蹤修訂）
-  - `tag_protector.py`（標籤保護）
-  - `extract_table_to_markdown.py`（表格提取）
-  - `generate_translation_mapping.py`（對照表生成）
-  - `run_translation_workflow.sh`（自動化工作流程）
-- 不得創建替代腳本。
-- 若遇到錯誤，應僅輸出錯誤訊息並請求人工檢查，不可嘗試自動重寫腳本。
+## 🛠️ 核心脚本
 
-# FC Insider 翻譯更新 Skill
+### extract_table_markitdown_simple.py
+从 Word 文档提取表格，转换为 AI 友好的 Markdown 格式。使用 Microsoft MarkItDown，专为 LLM 优化。
 
+### generate_translation_mapping.py
+生成新旧翻译映射表。支持智能匹配（顺序无关）、segment_id 匹配、index 匹配三种模式。自动过滤占位符行。
 
+### update_fc_insider_tracked.py
+将翻译应用到 Word 文档，使用追踪修订标记变更。自动检测文档类型，支持三种读取模式（auto/read_deleted/read_inserted）。
 
-## 概述
+### run_complete_workflow.py
+一键执行完整工作流程。自动调用上述三个脚本，管理临时文件，提供依赖检查。
 
-本 Skill 專門處理 FC Insider 格式的 DOCX 文件翻譯更新：
-- 四欄表格結構（Segment ID | Status | Source | Target）
-- 使用追蹤修訂標記變更
-- 高效處理包含 `<51>`, `<52>` 等標籤的文本
-- 批量處理以最小化 token 消耗
-- 必須使用SKILLS包中的腳本update_fc_insider_v3.py，不得在執行任務中自己生成其他腳本
+### analyze_word_structure_deep.py
+深度诊断工具。分析 Word 文档结构，识别问题，提供解决方案建议。仅在遇到问题时使用。
 
-## 關鍵優化
+---
 
-### 1. 標籤保護策略（解決 `<51>` 衝突）
+## 📝 输入文件格式
 
-FC Insider 文件的 Target segment 包含 `<51>`, `<52>` 等標籤，這些是**純文本**，不是 XML 元素。
+### 新翻译文件（纯文本，推荐）
 
-**問題**：使用 `get_node(contains="<51>")` 會失敗，因為 `<51>` 被當作 XML 標籤解析。
-
-**解決方案**：使用 Unicode 相似字符臨時替換
-```python
-from scripts.tag_protector import protect_tags, restore_tags
-
-# 在查找前保護
-search_text = protect_tags("這是 <51> 測試")  # → "這是 ⟨51⟩ 測試"
-# ...
-
-# 替換時也使用保護後的文本
-# V3 優化：在 XML 內容中不執行 restore_tags，保留 ⟨⟩ 字符以避免 XML 解析錯誤。
-重要：使用 Unicode 字符（⟨ U+27E8, ⟩ U+27E9）而非 HTML 實體，避免二次轉義。
-
-
-###2. 段落清理/標準化 (V3 核心修正)
-在替換前，會執行「段落內容清理」邏輯：
-
-目的： 消除因 Word 編輯歷史導致的 文本碎片化 問題。
-
-機制： 聚合 <w:p> 內所有 Runs 的文本和格式，然後替換整個段落。這確保了替換操作的目標是單一、標準化的 XML 結構。
-
-### 3. 使用 Document 類別（docx skill 最佳實踐）
-
-**不要**自己操作 XML 字串，使用已驗證的 Document 類別方法：
-
-```python
-import sys
-sys.path.insert(0, '/mnt/skills/public/docx')
-from scripts.document import Document
-
-# 初始化（啟用追蹤修訂）
-doc = Document(
-    'unpacked_doc',
-    author="Claude",
-    rsid="00AB12CD",        # 從 unpack 獲取
-    track_revisions=True
-)
-
-# 查找節點
-old_node = doc["word/document.xml"].get_node(
-    tag="w:r",
-    contains=protected_text  # 使用保護後的文本
-)
-
-# 保留格式
-rpr_tags = old_node.getElementsByTagName("w:rPr")
-rpr = rpr_tags[0].toxml() if rpr_tags else ""
-
-# 替換節點（自動添加追蹤修訂）
-replacement = f'''
-<w:del>
-    <w:r>
-        {rpr}
-        <w:delText>{protected_old_text}</w:delText>
-    </w:r>
-</w:del>
-<w:ins>
-    <w:r>
-        {rpr}
-        <w:t>{protected_new_text}</w:t>
-    </w:r>
-</w:ins>
-'''
-
-doc["word/document.xml"].replace_node(old_node, replacement)
-
-# 保存
-doc.save()
+```txt
+PY26 正式啟動！作為創辦人理事會領袖...
+您是團隊的榜樣。為協助您更輕鬆且...
+請聆聽安麗市場事業總裁 John Parker...
 ```
 
-### 3. 智能查找策略（減少 token）
+**要求**：
+- 每行一个翻译
+- 不包含占位符行
+- 顺序可以不一致（使用 `--match-by smart`）
+- 行数需要与过滤后的表格行数一致
 
-不要盲目查找，使用**上下文線索**縮小範圍：
+---
 
-```python
-# ❌ 低效：直接查找文本（可能有多個匹配）
-node = doc["word/document.xml"].get_node(tag="w:r", contains="測試")
+## 📚 完整文档
 
-# ✅ 高效：先定位 segment_id，再在該區域查找
-# 1. 找到包含 segment_id 的表格行
-row_node = doc["word/document.xml"].get_node(tag="w:tr", contains=segment_id)
+### 详细指南
+- **[PARAMETERS.md](PARAMETERS.md)** - 完整参数说明
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - 故障排查指南
+- **[BEST_PRACTICES.md](BEST_PRACTICES.md)** - 使用最佳实践
+- **[ADVANCED.md](ADVANCED.md)** - 高级功能详解
+- **[MIGRATION_GUIDE.md](MIGRATION_GUIDE.md)** - 从旧版本迁移
 
-# 2. 在該行內查找第 4 個 <w:tc>（使用 minidom 遍歷）
-cells = row_node.getElementsByTagName("w:tc")
-target_cell = cells[3] if len(cells) >= 4 else None
+### 核心技术
+- **[SMART_MATCHING_GUIDE.md](SMART_MATCHING_GUIDE.md)** - 智能匹配详解
+- **[TRACKED_CHANGES_SOLUTION.md](TRACKED_CHANGES_SOLUTION.md)** - 追踪修订处理
+- **[PLACEHOLDER_FILTER_GUIDE.md](PLACEHOLDER_FILTER_GUIDE.md)** - 占位符过滤
+- **[MAPPING_MECHANISM_EXPLAINED.md](MAPPING_MECHANISM_EXPLAINED.md)** - 映射机制详解
 
-# 3. 在 target_cell 內查找文本（範圍大幅縮小）
-```
+---
 
-## 使用流程
+## 💡 快速提示
 
-### 步驟 1: 準備翻譯數據
+### 遇到映射不正确？
+使用 `--match-by smart --verbose` 查看匹配详情和相似度分数。
 
-翻譯數據應為 JSON 格式：
-
-```json
-{
-  "translations": [
-    {
-      "segment_id": "7bb0408a-1",
-      "old_text": "舊的翻譯",
-      "new_text": "新的翻譯"
-    }
-  ]
-}
-```
-
-### 步驟 2: 解包 DOCX
-
+### 遇到更新失败？
+运行诊断工具：
 ```bash
-python /mnt/skills/public/docx/ooxml/scripts/unpack.py input.docx unpacked/
+python3 analyze_word_structure_deep.py \
+  --input "input.docx" \
+  --sample-segment "segment-id" \
+  --verbose
 ```
 
-**重要**：記錄 unpack 腳本輸出的 **RSID**，例如：
-```
-Suggested RSID for new content: 00AB12CD
-```
+### 行数不匹配？
+检查新翻译文件是否包含占位符行。使用 `--verbose` 查看哪些行被过滤。
 
-### 步驟 3: 執行批量更新
+---
 
-```bash
-python scripts/update_fc_insider_v3.py \
-  --unpacked unpacked/ \
-  --translations translations.json \
-  --rsid 00AB12CD \
-  --author "Claude"
-```
+## 📊 版本信息
 
-### 步驟 4: 打包 DOCX
+**当前版本**：v2.0
 
-```bash
-python /mnt/skills/public/docx/ooxml/scripts/pack.py \
-  unpacked/ \
-  output_with_tracking.docx
-```
+**主要特性**：
+- 智能匹配功能
+- 追踪修订自动处理
+- 占位符自动过滤
+- 一键执行脚本
+- 深度诊断工具
 
-## 腳本詳解
-
-### scripts/tag_protector.py
-
-保護和恢復標籤的工具函數：
-
-```python
-def protect_tags(text):
-    """將 <51> 等標籤替換為安全字符（⟨51⟩）"""
-    return text.replace('<', '⟨').replace('>', '⟩')
-
-def restore_tags(text):
-    """恢復原始標籤"""
-    return text.replace('⟨', '<').replace('⟩', '>')
-```
-
-**為什麼需要這個？**
-- `get_node(contains="<51>")` 會失敗（XML 解析錯誤）
-- `get_node(contains="⟨51⟩")` 可以正常工作
-- 最後統一恢復標籤
-
-### scripts/update_fc_insider_v3.py
-
-請見scripts/update_fc_insider_v3.py
-
-
-
-## 常見問題
-
-
-
-### Q: 如何處理 `<51>` 標籤？
-
-A: 使用 Unicode 相似字符臨時保護：
-```python
-# 查找前保護
-search_text = protect_tags("文字 <51>")  # → "文字 ⟨51⟩"
-
-# 使用保護後的文本
-node = doc["word/document.xml"].get_node(contains=search_text)
-
-# 全部完成後統一恢復
-xml_content = restore_tags(xml_content)
-```
-
-
-
-### Q: 如何驗證追蹤修訂？
-
-A: 檢查生成的標記數量：
-```bash
-grep -c '<w:del>' unpacked/word/document.xml
-grep -c '<w:ins>' unpacked/word/document.xml
-```
-
-應該各有 N 個（N = 更新的 segment 數量）
-
-## 錯誤處理協定
-
-若腳本執行發生錯誤：
-1. 僅回報錯誤訊息與 stack trace；
-2. 不可自動生成或修改任何腳本；
-3. 不可使用 minidom、BeautifulSoup 等替代解析方案；
-4. 若需要修正，應請求人工提供更新版；
-5. 不可臆測腳本內容。
-
-## 限制
-
-- 假設文件結構為四欄表格
-- Segment ID 必須在第 1 欄
-- Target segment 必須在第 4 欄
-- 不支持嵌套表格
-
-## 進階使用
-
-### 詳細的 XML 結構參考
-
-查看 [references/xml_patterns.md](references/xml_patterns.md) 了解：
-- FC Insider 表格的完整 XML 結構
-- 如何識別和跳過 Tag 樣式
-- 追蹤修訂的 XML 模式
-- 標籤保護的技術細節
-
-### 快速開始範例
-
-查看 [references/quickstart.md](references/quickstart.md) 了解：
-- 完整的端到端範例
-- 自動化腳本
-- 常見錯誤排查
-- 驗證方法
-
-## 相關文檔
-
-- [docx skill 文檔](../../public/docx/SKILL.md) - Document 類別完整參考
-- [OOXML 追蹤修訂指南](../../public/docx/ooxml.md) - 追蹤修訂的技術細節
+查看 [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) 了解从 v1.0 迁移指南。
