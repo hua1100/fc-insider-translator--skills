@@ -14,6 +14,7 @@
 
 import json
 import argparse
+import re
 from pathlib import Path
 from typing import List, Dict, Optional
 
@@ -56,6 +57,77 @@ def load_markdown_table(md_path: str) -> List[Dict[str, str]]:
                     })
 
     return rows
+
+
+def is_placeholder_row(text: str) -> bool:
+    """
+    判断是否为占位符行
+
+    占位符行的特征：
+    - 主要由 <数字/> 标记组成
+    - 可能包含少量固定文本（如"在第"、"頁"）
+    - 例如: "<0/>"在第 <1/> 頁, "<2/>", 第 <12/> 頁
+
+    Returns:
+        True if the text is primarily placeholders
+    """
+    # 移除所有占位符
+    without_placeholders = re.sub(r'[<"]?\d+/?[>"]?', '', text)
+    # 移除引号
+    without_placeholders = re.sub(r'["""\'\'<>]', '', without_placeholders)
+    # 移除常见的连接词
+    without_placeholders = re.sub(r'(在第|頁|on page|page)', '', without_placeholders, flags=re.IGNORECASE)
+    # 移除空白
+    without_placeholders = without_placeholders.strip()
+
+    # 如果移除占位符后剩余内容很少，认为是占位符行
+    if len(without_placeholders) <= 3:
+        return True
+
+    # 检查是否包含大量占位符标记
+    placeholder_count = len(re.findall(r'<\d+/>', text))
+    if placeholder_count >= 2:
+        # 如果有2个或更多占位符，且总长度很短
+        if len(text) <= 30:
+            return True
+
+    return False
+
+
+def filter_placeholder_rows(rows: List[Dict[str, str]], verbose: bool = False) -> List[Dict[str, str]]:
+    """
+    过滤掉占位符行
+
+    Args:
+        rows: 表格行列表
+        verbose: 是否显示详细信息
+
+    Returns:
+        过滤后的行列表
+    """
+    filtered = []
+    skipped = []
+
+    for row in rows:
+        target_text = row['target']
+
+        if is_placeholder_row(target_text):
+            skipped.append(row)
+        else:
+            filtered.append(row)
+
+    if verbose:
+        print(f"\n占位符过滤:")
+        print(f"  总行数: {len(rows)}")
+        print(f"  保留: {len(filtered)}")
+        print(f"  跳过: {len(skipped)}")
+
+        if skipped:
+            print(f"\n跳过的占位符行（前10个）:")
+            for i, row in enumerate(skipped[:10], 1):
+                print(f"    {i}. {row['segment_id']}: {row['target'][:50]}")
+
+    return filtered
 
 
 def load_new_translations(input_path: str, format: str = 'auto') -> Dict[str, str]:
@@ -267,6 +339,16 @@ def main():
         action='store_true',
         help='只预览变更，不保存文件'
     )
+    parser.add_argument(
+        '--skip-placeholder-filter',
+        action='store_true',
+        help='跳过占位符过滤（默认会过滤）'
+    )
+    parser.add_argument(
+        '--verbose',
+        action='store_true',
+        help='显示详细信息'
+    )
 
     args = parser.parse_args()
 
@@ -278,6 +360,11 @@ def main():
     print(f"\n读取 Markdown 表格: {args.markdown}")
     old_table = load_markdown_table(args.markdown)
     print(f"✓ 加载 {len(old_table)} 行")
+
+    # 过滤占位符行
+    if not args.skip_placeholder_filter:
+        old_table = filter_placeholder_rows(old_table, args.verbose)
+        print(f"✓ 过滤后保留 {len(old_table)} 行（跳过了占位符行）")
 
     print(f"\n读取新译文: {args.new_translations}")
     new_translations = load_new_translations(args.new_translations, args.format)
